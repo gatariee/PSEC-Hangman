@@ -24,8 +24,7 @@ def game(player: str, session: int) -> int:
     while '_' in guess_progress and counter < 5:
         print(guess_progress)
         guess = input("Guess: ")
-        guess_progress, guess_list, check, incorrect_list = guessCheck(
-            word=word, guess=guess, previous_guesses=guess_list, previous_result=guess_progress, incorrect=incorrect_list)
+        guess_progress, guess_list, check, incorrect_list = guessCheck(word=word, guess=guess, previous_guesses=guess_list, previous_result=guess_progress, incorrect=incorrect_list)
         if (not check):
             counter += 1
         banner(player, session, counter, incorrect_list)
