@@ -4,15 +4,13 @@ class Word:
         self.difficulty = difficulty
     def show(self):
         print(f'The current word is {self.word} and the difficulty is {self.difficulty}')
-wordlist = [
-    {'word': 'kangaroo', 'difficulty': 'hard'}
-]
-
-
 def banner(player: str, session: int, incorrect: int, incorrect_list: list) -> str:
     print(
         f'\n\n\nH A N G M A N\nPlayer: {player}\n{session} of 3\nIncorrect letters: {incorrect_list} ({incorrect})\n')
-
+        
+wordlist = [
+    {'word': 'kangaroo', 'difficulty': 'hard'}
+]
 
 def game(player: str, session: int) -> int:
     counter = 0
