@@ -41,8 +41,6 @@ def guessCheck(word, guess, guess_progress):
         ans ==  AFTER checking
         logically, guess_progress is the previous iteration of ans
     """
-
-    
     global previous_guesses
     global incorrect_list
     ans = ""
