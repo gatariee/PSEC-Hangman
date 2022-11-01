@@ -1,0 +1,7 @@
+[
+    {
+        "difficulty": "hard",
+        "type": "word",
+        "word": "kangaroo"
+    }
+]

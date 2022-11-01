@@ -1,67 +1,100 @@
-class Word:
-    def __init__(self, word, difficulty):
-        self.word = word
-        self.difficulty = difficulty
-    def show(self):
-        print(f'The current word is {self.word} and the difficulty is {self.difficulty}')
-wordlist = [
-    {'word': 'kangaroo', 'difficulty': 'hard'}
-]
+import ast
+from inspect import istraceback
+import random
+session = 0
+previous_words = []
+def readWords():
+    """
+    Returns:
+        wordlist(list): [
+            {
+                'word': value,
+                'difficulty': value,
+                'type': value,
+            },
+            {
+                ...
+            }
+        ]
+    """
+    try:
+        with open('wordlist.txt') as f:
+            global wordlist
+            wordlist = (ast.literal_eval(f.read()))
+    except:
+        print("Error. Wordlist not found. ")
 
 
-def banner(player: str, session: int, incorrect: int, incorrect_list: list) -> str:
-    print(
-        f'\n\n\nH A N G M A N\nPlayer: {player}\n{session} of 3\nIncorrect letters: {incorrect_list} ({incorrect})\n')
+def guessCheck(word, guess, guess_progress):
+    """
+    Args:
+        word (str): The word that is being guessed
+        guess (str): The letter that the user has guessed
+        guess_progress (str): The current progress of the game
 
+    Returns:
+        check (bool): returns True if guess is correct, False if guess is wrong
+        ans (str): returns the result after checking the guess
 
-def game(player: str, session: int) -> int:
-    counter = 0
-    word = wordlist[0]['word']
-    guess_list = []
-    incorrect_list = []
-    guess_progress = "_ " * len(word)
-    banner(player, session, counter, incorrect_list)
-    while '_' in guess_progress and counter < 5:
-        print(guess_progress)
-        guess = input("Guess: ")
-        guess_progress, guess_list, check, incorrect_list = guessCheck(
-            word=word, guess=guess, previous_guesses=guess_list, previous_result=guess_progress, incorrect=incorrect_list)
-        if (not check):
-            counter += 1
-        banner(player, session, counter, incorrect_list)
-    return (len(guess_progress.replace(" ", "").replace('_', '')))
+    Note:
+        guess_progress == BEFORE checking
+        ans ==  AFTER checking
+        logically, guess_progress is the previous iteration of ans
+    """
 
-
-def guessCheck(word: str, guess: str, previous_guesses: str, previous_result: str, incorrect: list) -> str:
-    str = ''
+    
+    global previous_guesses
+    global incorrect_list
+    ans = ""
     check = False
     for letter in word:
-        if (letter == guess):
+        if letter == guess:
             previous_guesses.append(guess)
     for letter in word:
         if letter in previous_guesses:
-            str += letter+" "
-            if letter not in previous_result:
+            ans += letter + " "
+            if letter not in guess_progress:
                 check = True
         else:
-            str += "_ "
-    if (not check):
-        incorrect.append(guess)
-    return (str, previous_guesses, check, incorrect)
+            ans += "_ "
+    if not check:
+        incorrect_list.append(guess)
+    return check, ans
 
+def game():    
+    word = pickWord()
+    global incorrect_list
+    global previous_guesses
+    previous_guesses = [] # Globally accessible
+    incorrect_list = [] # Globally accessible
+    guess_progress = "_ " * len(word) # Initial
+    while 1:
+        print(f'Current progress: {guess_progress}')
+        userGuess = input("Guess: ")
+        correct, guess_progress = guessCheck(word=word, guess=userGuess, guess_progress=guess_progress)
+        print(guess_progress)
+        print(incorrect_list)
+        print(previous_guesses)
 
-class Player:
-    def __init__(self, name, points):
-        self.name = name
-        self.points = points
+def pickWord():
+    readWords()
+    global previous_words
+    randIndex = random.randint(0, len(wordlist)-1)
+    if(randIndex in previous_words):
+        pickWord()
+    else:
+        word = wordlist[randIndex]['word']
+        previous_words.append(randIndex)
+    return word
 
+def banner(name):
+    global session
+    session += 1
+    print(f'\nH A N G M A N\nPlayer: {name}\n{session} out of 3')
 
-def main():
-    player_list = []
-    player = Player(input("Please enter your name: "), 0)
-    for i in range(3):
-        player.points += game(player=player.name, session=i+1) * 2
-    player_list.append(vars(player))
-    print(player_list)
+def begin():
+    playerName = input("Please enter your name: ")
+    banner(playerName)
+    game()
 
-main()
+begin()
