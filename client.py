@@ -1,5 +1,4 @@
 import ast
-from inspect import istraceback
 import random
 session = 0
 previous_words = []
@@ -35,6 +34,7 @@ def guessCheck(word, guess, guess_progress):
     Returns:
         check (bool): returns True if guess is correct, False if guess is wrong
         ans (str): returns the result after checking the guess
+        counter (int): returns the count of letters guessed
 
     Note:
         guess_progress == BEFORE checking
@@ -44,6 +44,7 @@ def guessCheck(word, guess, guess_progress):
     global previous_guesses
     global incorrect_list
     ans = ""
+    counter = 0
     check = False
     for letter in word:
         if letter == guess:
@@ -52,28 +53,39 @@ def guessCheck(word, guess, guess_progress):
         if letter in previous_guesses:
             ans += letter + " "
             if letter not in guess_progress:
+                counter+=1
                 check = True
         else:
             ans += "_ "
     if not check:
         incorrect_list.append(guess)
-    return check, ans
+    return check, ans, counter
 
 def game():    
     word = pickWord()
     global incorrect_list
     global previous_guesses
+    global guess_progress
+    global incorrect
     previous_guesses = [] # Globally accessible
     incorrect_list = [] # Globally accessible
     guess_progress = "_ " * len(word) # Initial
-    while 1:
-        print(f'Current progress: {guess_progress}')
+    incorrect = len(incorrect_list)
+    while(1):
+        print(f'Incorrect letters: {", ".join(incorrect_list)}')
+        print(f'{guess_progress}')
         userGuess = input("Guess: ")
-        correct, guess_progress = guessCheck(word=word, guess=userGuess, guess_progress=guess_progress)
-        print(guess_progress)
-        print(incorrect_list)
-        print(previous_guesses)
-
+        if(userGuess in previous_guesses):
+            banner()
+            print(f'"{userGuess}" has already been tried. ')
+            continue
+        correct, guess_progress, counter = guessCheck(word, userGuess, guess_progress)
+        print(f'{guess_progress}')
+        banner()
+        if(correct):
+            print(f'Good job! "{userGuess}" appeared {counter} times!')
+        else:
+            print(f'"{userGuess}" is not in the word.')
 def pickWord():
     readWords()
     global previous_words
@@ -85,14 +97,15 @@ def pickWord():
         previous_words.append(randIndex)
     return word
 
-def banner(name):
-    global session
-    session += 1
-    print(f'\nH A N G M A N\nPlayer: {name}\n{session} out of 3')
+def banner():
+    print(f'\nH A N G M A N\nPlayer: {playerName}\n{session} out of 3')
 
 def begin():
+    global playerName
+    global session
+    session += 1
     playerName = input("Please enter your name: ")
-    banner(playerName)
+    banner()
     game()
 
 begin()
