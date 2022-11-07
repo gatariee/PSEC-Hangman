@@ -3,5 +3,15 @@
         "difficulty": "hard",
         "type": "word",
         "word": "kangaroo"
+    },
+    {
+        "difficulty": "easy",
+        "type": "word",
+        "word": "test"
+    },
+    {
+        "difficulty": "medium",
+        "type": "word",
+        "word": "monkey"
     }
 ]
