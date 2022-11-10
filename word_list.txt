@@ -1,0 +1,17 @@
+[
+    {
+        "word": "test",
+        "type": "word",
+        "difficulty": "easy"
+    },
+    {
+        "word": "liver",
+        "type": "word",
+        "difficulty": "medium"
+    },
+    {
+        "word": "potato",
+        "type": "word",
+        "difficulty": "hard"
+    }
+]
