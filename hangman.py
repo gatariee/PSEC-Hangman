@@ -5,6 +5,12 @@ import json
 import os
 class Game:
     def __init__(self, player):
+        """_summary_:
+            Initializes the game object
+        Args:
+            player (_type_): str
+                _description_: The name of the player
+        """
         self.player = player
         self.session = session 
         self.word, self.type, self.difficulty = Game.pickWord()
@@ -14,9 +20,27 @@ class Game:
         self.guess_progress = "_ " * len(self.word)
         self.totalPoints = 0
     def calculatePoints(self):
+        """_summary_: 
+            Removes all underscores and whitespace from guess_progress and multiplies the length of the result by 2.
+            The length of the result is the number of CORRECT guesses
+        Returns:
+            _type_: int
+            _description_: The number of points accumulated from the session
+        """
         return len((self.guess_progress).replace("_", " ").replace(" ", "")) * 2
     def endGame(log):
+        """_summary_: 
+            This function is called at the end of the game before logging and destruction of game object.
+            It prints the final score of the player and gives the player an option to print the leaderboard
+        Args:
+            log (_type_): object
+                _description_: 
+                The log object contains 3 keys. 'player', 'score', and 'date'
+        """
         def generateReport():
+            """_summary_: 
+                This function is called to permanently save the log object to game_logs.txt for administrative purposes
+            """
             with open('game_logs.txt', 'r+') as f:
                 if(os.stat("game_logs.txt").st_size == 0):
                     obj = []
@@ -30,11 +54,9 @@ class Game:
                 f.write(str(new))
                 f.close()
                 return
-        def displayReport():
-            print(f"Here is what we are logging: \n------------------------------------------\nName: {log['player']}\nPoints: {log['points']}\nDate: {log['date']}\n------------------------------------------")
         print(f"------------------------------------------\nGame Over. You have ended the game with {log['points']} points.") 
+        print(f"Here is what we are logging: \n------------------------------------------\nName: {log['player']}\nPoints: {log['points']}\nDate: {log['date']}\n------------------------------------------")
         generateReport()
-        displayReport()
     def guessLetter(self, letter):
         def verifyGuess(guess):
             if(not guess.isalpha()):
