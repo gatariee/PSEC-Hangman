@@ -9,8 +9,8 @@
 - maximum of 30 points (5* 2 * 3)
 - player wins if score is > 15 points
 ### File Navigation
-- [hangman.py](#hangman)
-- [admin.py](#admin)
+- hangman.py
+- admin.py
 - word_list.txt
 - game_settings.txt
 - game_log.txt
