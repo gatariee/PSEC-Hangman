@@ -3,8 +3,9 @@ import random
 from datetime import date
 import json
 import os
+import sys
 class Game:
-    def __init__(self, player):
+    def __init__(self, player: str) -> None: 
         """_summary_:
             Initializes the game object
         Args:
@@ -19,7 +20,7 @@ class Game:
         self.incorrect_list = []
         self.guess_progress = "_ " * len(self.word)
         self.totalPoints = 0
-    def calculatePoints(self):
+    def calculatePoints(self) -> int:
         """_summary_: 
             Removes all underscores and whitespace from guess_progress and multiplies the length of the result by 2.
             The length of the result is the number of CORRECT guesses
@@ -28,7 +29,7 @@ class Game:
             _description_: The number of points accumulated from the session
         """
         return len((self.guess_progress).replace("_", " ").replace(" ", "")) * 2
-    def endGame(log):
+    def endGame(log: object) -> None:
         """_summary_: 
             This function is called at the end of the game before logging and destruction of game object.
             It prints the final score of the player and gives the player an option to print the leaderboard
@@ -37,12 +38,12 @@ class Game:
                 _description_: 
                 The log object contains 3 keys. 'player', 'score', and 'date'
         """
-        def generateReport():
+        def generateReport() -> None:
             """_summary_: 
                 This function is called to permanently save the log object to game_logs.txt for administrative purposes
             """
-            with open('game_logs.txt', 'r+') as f:
-                if(os.stat("game_logs.txt").st_size == 0):
+            with open('./game_logs.txt', 'r+') as f:
+                if(os.stat("./game_logs.txt").st_size == 0):
                     obj = []
                     obj.append(log)
                 else:
@@ -57,7 +58,7 @@ class Game:
         print(f"------------------------------------------\nGame Over. You have ended the game with {log['points']} points.") 
         print(f"Here is what we are logging: \n------------------------------------------\nName: {log['player']}\nPoints: {log['points']}\nDate: {log['date']}\n------------------------------------------")
         generateReport()
-    def guessLetter(self, letter):
+    def guessLetter(self, letter: str) -> bool: 
         def verifyGuess(guess):
             if(not guess.isalpha()):
                 print("------------------------------------------\nPlease enter a letter.\n------------------------------------------")
@@ -86,7 +87,7 @@ class Game:
             print("------------------------------------------\nCongratulations. There are " + str(count) + " " + letter + "'s. \n------------------------------------------")
         elif(count == 1):
             print("------------------------------------------\nCongratulations. There is 1 " + letter + ". \n------------------------------------------")
-    def pickWord():
+    def pickWord() -> dict:
         def readWords():
             global previous_words
             try:
@@ -104,64 +105,105 @@ class Game:
         difficulty = wordlist[randIndex]['difficulty']
         previous_words.append(randIndex)
         return word, type, difficulty
-
-def main(): # Start of program
+def menu() -> int:
+    while(1):
+        userInput = input("""
+        ************ Welcome to HangMan **************
+                1: Start new game
+                2: Print leaderboard
+                3: Search player
+                4: Exit
+        \n>> """)
+        check, err = validateInput(userInput, 2)
+        if(check):
+            return int(userInput)
+        else:
+            print(err)
+            input("Press Enter to continue...")
+def banner(game: object, session: int, choice: int) -> None:
+    if(choice == 1):
+        print("\nWelcome to Hangman, " + game.player + "!")
+        print("Your word is " + str(len(game.word)) + " letters long. ")
+        print("You have 5 guesses to guess the word. Good Luck!")
+        print("Session: " + str(session) + "\n------------------------------------------")
+    elif(choice == 2):
+        print("\nYour word is " + str(len(game.word)) + " letters long. ")
+        print("Session: " + str(game.session) + "\n------------------------------------------")
+    elif(choice == 3):
+        print("\nWord: " + game.guess_progress)
+        print(f"Incorrect Guesses: {', '.join(game.incorrect_list)}")
+        print(f"Correct Guesses: {', '.join(list(set(game.previous_guesses) - set(game.incorrect_list)))}")
+        print("Guesses remaining: " + str(5 - game.guesses))
+def validateInput(input, choice: int) -> bool:
+    if(choice == 1): # Name validation
+        alphabets_lower = list(map(chr, range(97, 123)))
+        alphabets_upper = list(map(chr, range(65, 91)))
+        special_chars = ['-','/']
+        allowed_chars = alphabets_upper + alphabets_lower + special_chars
+        if(not all(char in allowed_chars for char in input)):
+            return False, "Please enter a valid name. "
+        else: 
+            if(os.stat("./game_logs.txt").st_size != 0):
+                with open("./game_logs.txt", 'r') as f:
+                    gameLogs = (ast.literal_eval(f.read()))
+                    for value in gameLogs:
+                        if(value['player'] == input):
+                            return False, "This name is already taken. "
+            return True, None
+    elif(choice == 2):
+        if(not input.isnumeric()):
+            return False, "Please enter a valid option."
+        options = [1,2,3,4]
+        for option in options:
+            if(int(input) == option):
+                return True, None
+        return False, "Please enter a valid option. "
+def gameSettings() -> object:
+    """_summary_:
+        This function reads "game_settings.txt" and returns the settings as a dictionary object
+        This dictionary object can be accessed globally
+    """
+    try:
+        with open('./game_settings.txt') as f:
+            game_settings = (ast.literal_eval(f.read()))
+            # For better readability
+            game_settings['attempts'] = game_settings['number of attempts']
+            game_settings['words'] = game_settings['number of words']
+            game_settings['top'] = game_settings['number of top players']
+            del game_settings['number of attempts'], game_settings['number of words'], game_settings['number of top players']
+            return game_settings
+    except:
+        print("Error. game_settings.txt not found. ")
+def main() -> None: 
     global previous_words
     global session
     session = 1
     previous_words = []
     while(1):
-        alphabets_lower = list(map(chr, range(97, 123)))
-        alphabets_upper = list(map(chr, range(65, 91)))
-        special_chars = ['-','/']
-        allowed_chars = alphabets_upper + alphabets_lower + special_chars
         playerName = input("Enter your name: ")
-        if(not all(char in allowed_chars for char in playerName)):
-            print("Please enter a valid name. ")
-            continue
-        else: 
-            count = 0
-            if(os.stat("game_logs.txt").st_size != 0):
-                with open("game_logs.txt", 'r') as f:
-                    gameLogs = (ast.literal_eval(f.read()))
-                    for value in gameLogs:
-                        if(value['player'] == playerName):
-                            break
-                        else:
-                            count+=1
-                if(count == len(gameLogs)):
-                    begin(playerName)
-                    return
-            else:
-                begin(playerName)
-                return
-            print("Name is taken. Please try again.")
-def begin(playerName): # Start of game loop
+        check, err = validateInput(playerName, 1)
+        if(check):
+            begin(playerName)
+            break
+        else:
+            print(err)
+def begin(playerName: str) -> None: 
     global session
-    HangMan = Game(playerName)
-    log['player'] = HangMan.player
+    HangMan = Game(playerName) 
     if(session == 1):
-        print("\nWelcome to Hangman, " + HangMan.player + "!")
-        print("Your word is " + str(len(HangMan.word)) + " letters long. ")
-        print("You have 5 guesses to guess the word. Good Luck!")
-        print("Session: " + str(session) + "\n------------------------------------------")
+        banner(HangMan, session, 1)
     else:
-        print("\nYour word is " + str(len(HangMan.word)) + " letters long. ")
-        print("Session: " + str(HangMan.session) + "\n------------------------------------------")
+        banner(HangMan, session, 2)
     while(HangMan.guesses < 5) and ((HangMan.guess_progress).replace(" ","") != HangMan.word):
         HangMan.calculatePoints()
-        print("\nWord: " + HangMan.guess_progress)
-        print(f"Incorrect Guesses: {', '.join(HangMan.incorrect_list)}")
-        print(f"Correct Guesses: {', '.join(list(set(HangMan.previous_guesses) - set(HangMan.incorrect_list)))}")
-        print("Guesses remaining: " + str(5 - HangMan.guesses))
+        banner(HangMan, session, 3)
         guess = input("Guess: ")
         HangMan.guessLetter(guess)
-    
     if(HangMan.guesses == 5):
         print("\nYou lose.")
     else:
         print("\nCongratulations. You win!")
-    print(f"The {HangMan.type} is \"{HangMan.word}\", the difficulty was {HangMan.difficulty}.")
+    print(f"The {HangMan.type} is \"{HangMan.word}\"")
     if(session < 3):
         session+=1
         log['points'] += HangMan.calculatePoints()
@@ -169,11 +211,25 @@ def begin(playerName): # Start of game loop
         begin(playerName)
     else:
         log['points'] += HangMan.calculatePoints()
-        Game.endGame(log=log)
-
-
-    
-
+        log['player'] = HangMan.player
+        Game.endGame(log)
 if(__name__ == "__main__"):
-    log = {'player': '','points': 0, 'date': date.today().strftime("%d/%m/%y")}
-    main()
+    
+    log = {
+        'player': '',
+        'points': 0, 
+        'date': date.today().strftime("%d/%m/%y")
+    }
+    settings = gameSettings()
+    while(1):
+        choice = menu() 
+        if(choice == 1):
+            main()
+            break
+        elif(choice == 2):
+            print('print lb')
+        elif(choice == 3):
+            print('search player on lb')
+        elif(choice == 4):
+            sys.exit()
+        input("Press Enter to continue...")

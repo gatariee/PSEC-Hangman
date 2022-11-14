@@ -1,0 +1,3 @@
+- Finish basic requirements
+- Create a function for validation
+- 

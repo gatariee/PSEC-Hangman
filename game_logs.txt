@@ -1,0 +1,7 @@
+[
+    {
+        "player": "Zavier",
+        "points": 30,
+        "date": "14/11/22"
+    }
+]
