@@ -1,7 +1,37 @@
 [
     {
+        "player": "Tari",
+        "points": 14,
+        "date": "15/11/22"
+    },
+    {
         "player": "Zavier",
-        "points": 30,
-        "date": "14/11/22"
+        "points": 24,
+        "date": "15/11/22"
+    },
+    {
+        "player": "Zavier2",
+        "points": 24,
+        "date": "15/11/22"
+    },
+    {
+        "player": "Zavier3",
+        "points": 9,
+        "date": "15/11/22"
+    },
+    {
+        "player": "Zavier4",
+        "points": 4,
+        "date": "15/11/22"
+    },
+    {
+        "player": "Zavier5",
+        "points": 11,
+        "date": "15/11/22"
+    },
+    {
+        "player": "I want to die",
+        "points": 34,
+        "date": "15/11/22"
     }
 ]

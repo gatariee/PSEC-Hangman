@@ -1,6 +1,7 @@
 import ast
 import json
 import os
+from hangman import *
 def addWord():
     newWord = {
         'word': input('word: '),
@@ -24,3 +25,5 @@ def addWord():
     except:
         print("Error. Wordlist not found. ")
         return
+while(1):
+    addWord()

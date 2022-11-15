@@ -1,17 +1,17 @@
 [
     {
-        "word": "test",
+        "word": "jesus",
         "type": "word",
         "difficulty": "easy"
     },
     {
-        "word": "liver",
-        "type": "word",
-        "difficulty": "medium"
-    },
-    {
-        "word": "potato",
+        "word": "octopus",
         "type": "word",
         "difficulty": "hard"
+    },
+    {
+        "word": "penis",
+        "type": "word",
+        "difficulty": "easy"
     }
 ]

@@ -6,12 +6,6 @@ import os
 import sys
 class Game:
     def __init__(self, player: str) -> None: 
-        """_summary_:
-            Initializes the game object
-        Args:
-            player (_type_): str
-                _description_: The name of the player
-        """
         self.player = player
         self.session = session 
         self.word, self.type, self.difficulty = Game.pickWord()
@@ -21,27 +15,9 @@ class Game:
         self.guess_progress = "_ " * len(self.word)
         self.totalPoints = 0
     def calculatePoints(self) -> int:
-        """_summary_: 
-            Removes all underscores and whitespace from guess_progress and multiplies the length of the result by 2.
-            The length of the result is the number of CORRECT guesses
-        Returns:
-            _type_: int
-            _description_: The number of points accumulated from the session
-        """
         return len((self.guess_progress).replace("_", " ").replace(" ", "")) * 2
     def endGame(log: object) -> None:
-        """_summary_: 
-            This function is called at the end of the game before logging and destruction of game object.
-            It prints the final score of the player and gives the player an option to print the leaderboard
-        Args:
-            log (_type_): object
-                _description_: 
-                The log object contains 3 keys. 'player', 'score', and 'date'
-        """
         def generateReport() -> None:
-            """_summary_: 
-                This function is called to permanently save the log object to game_logs.txt for administrative purposes
-            """
             with open('./game_logs.txt', 'r+') as f:
                 if(os.stat("./game_logs.txt").st_size == 0):
                     obj = []
@@ -55,17 +31,17 @@ class Game:
                 f.write(str(new))
                 f.close()
                 return
-        print(f"------------------------------------------\nGame Over. You have ended the game with {log['points']} points.") 
-        print(f"Here is what we are logging: \n------------------------------------------\nName: {log['player']}\nPoints: {log['points']}\nDate: {log['date']}\n------------------------------------------")
+        print(f"{padding}\nGame Over. You have ended the game with {log['points']} points.") 
+        print(f"Here is what we are logging: \n{padding}\nName: {log['player']}\nPoints: {log['points']}\nDate: {log['date']}\n{padding}")
         generateReport()
     def guessLetter(self, letter: str) -> bool: 
         def verifyGuess(guess):
             if(not guess.isalpha()):
-                print("------------------------------------------\nPlease enter a letter.\n------------------------------------------")
+                print(f"{padding}\nPlease enter a letter.\n{padding}")
             elif(len(guess) != 1):
-                print("------------------------------------------\nPlease enter a single letter. \n------------------------------------------")
+                print(f"{padding}\nPlease enter a single letter. \n{padding}")
             elif(guess in self.previous_guesses):
-                print("------------------------------------------\nYou already guessed that letter. \n------------------------------------------")
+                print(f"{padding}\nYou already guessed that letter. \n{padding}")
             else:
                 return True
         if(not verifyGuess(letter)):
@@ -76,17 +52,19 @@ class Game:
         if letter in self.word:
             for i in range(len(self.word)):
                 if self.word[i] == letter:
-                    self.guess_progress = self.guess_progress[:i*2] + letter + self.guess_progress[i*2+1:]
+                    before = self.guess_progress[:i*2]
+                    after = self.guess_progress[i*2+1:]
+                    self.guess_progress = before + letter + after
                     count+=1
         else:
             self.guesses += 1
             self.incorrect_list.append(letter)
-            print("------------------------------------------\nIncorrect! You have " + str(5-self.guesses) + " guesses left. \n------------------------------------------")
+            print(f"{padding}\nIncorrect! You have " + str(settings['guesses']-self.guesses) + f" guesses left. \n{padding}")
         self.previous_guesses.append(letter)
         if(count > 1):
-            print("------------------------------------------\nCongratulations. There are " + str(count) + " " + letter + "'s. \n------------------------------------------")
+            print(f"{padding}\nCongratulations. There are " + str(count) + " " + letter + f"'s. \n{padding}")
         elif(count == 1):
-            print("------------------------------------------\nCongratulations. There is 1 " + letter + ". \n------------------------------------------")
+            print(f"{padding}\nCongratulations. There is 1 " + letter + f". \n{padding}")
     def pickWord() -> dict:
         def readWords():
             global previous_words
@@ -100,12 +78,11 @@ class Game:
         randIndex = random.randint(0, len(wordlist)-1)
         while(randIndex in previous_words):
             randIndex = random.randint(0, len(wordlist)-1)
-        word = wordlist[randIndex]['word']
-        type = wordlist[randIndex]['type']
-        difficulty = wordlist[randIndex]['difficulty']
         previous_words.append(randIndex)
+        word, type, difficulty = wordlist[randIndex]['word'], wordlist[randIndex]['type'], wordlist[randIndex]['difficulty']
         return word, type, difficulty
 def menu() -> int:
+    # loop until check is true
     while(1):
         userInput = input("""
         ************ Welcome to HangMan **************
@@ -124,16 +101,13 @@ def banner(game: object, session: int, choice: int) -> None:
     if(choice == 1):
         print("\nWelcome to Hangman, " + game.player + "!")
         print("Your word is " + str(len(game.word)) + " letters long. ")
-        print("You have 5 guesses to guess the word. Good Luck!")
-        print("Session: " + str(session) + "\n------------------------------------------")
     elif(choice == 2):
-        print("\nYour word is " + str(len(game.word)) + " letters long. ")
-        print("Session: " + str(game.session) + "\n------------------------------------------")
+        print("Session: " + str(session) + " / " + str(settings['attempts']) + f"\n{padding}")
     elif(choice == 3):
         print("\nWord: " + game.guess_progress)
         print(f"Incorrect Guesses: {', '.join(game.incorrect_list)}")
         print(f"Correct Guesses: {', '.join(list(set(game.previous_guesses) - set(game.incorrect_list)))}")
-        print("Guesses remaining: " + str(5 - game.guesses))
+        print("Guesses remaining: " + str(settings['guesses'] - game.guesses))
 def validateInput(input, choice: int) -> bool:
     if(choice == 1): # Name validation
         alphabets_lower = list(map(chr, range(97, 123)))
@@ -150,7 +124,7 @@ def validateInput(input, choice: int) -> bool:
                         if(value['player'] == input):
                             return False, "This name is already taken. "
             return True, None
-    elif(choice == 2):
+    elif(choice == 2): # menu validation
         if(not input.isnumeric()):
             return False, "Please enter a valid option."
         options = [1,2,3,4]
@@ -158,28 +132,39 @@ def validateInput(input, choice: int) -> bool:
             if(int(input) == option):
                 return True, None
         return False, "Please enter a valid option. "
+def printLeaderboard(num) -> None:
+    def readLogs():
+        try:
+            with open('game_logs.txt', 'r') as f:
+                logs = (ast.literal_eval(f.read()))
+                return logs
+        except:
+            print("Error. Game logs not found. ")
+    logs = readLogs()
+    logs.sort(key=lambda x: x['points'], reverse=True) # sort from highest to lowest points
+    print(f"{padding}\n LEADERBOARD (Top {num})\n{padding}")
+    for i in range(len(logs)): 
+        # could also i in range num but this is more flexible because it can print less than num if there are less than num logs
+        print(f"{i+1}. {logs[i]['player']} - {logs[i]['points']} points")
+        if(i == num-1):
+            break
+    print(f"{padding}\n") 
 def gameSettings() -> object:
-    """_summary_:
-        This function reads "game_settings.txt" and returns the settings as a dictionary object
-        This dictionary object can be accessed globally
-    """
     try:
         with open('./game_settings.txt') as f:
             game_settings = (ast.literal_eval(f.read()))
             # For better readability
             game_settings['attempts'] = game_settings['number of attempts']
+            game_settings['guesses'] = game_settings['number of guesses']
             game_settings['words'] = game_settings['number of words']
             game_settings['top'] = game_settings['number of top players']
+            # Completely unnecessary but good for my sanity
             del game_settings['number of attempts'], game_settings['number of words'], game_settings['number of top players']
             return game_settings
     except:
         print("Error. game_settings.txt not found. ")
 def main() -> None: 
-    global previous_words
-    global session
-    session = 1
-    previous_words = []
-    while(1):
+    while(1): # loops until check is true
         playerName = input("Enter your name: ")
         check, err = validateInput(playerName, 1)
         if(check):
@@ -192,42 +177,51 @@ def begin(playerName: str) -> None:
     HangMan = Game(playerName) 
     if(session == 1):
         banner(HangMan, session, 1)
+        banner(HangMan, session, 2)
     else:
         banner(HangMan, session, 2)
-    while(HangMan.guesses < 5) and ((HangMan.guess_progress).replace(" ","") != HangMan.word):
+    while(HangMan.guesses < settings['guesses']) and ((HangMan.guess_progress).replace(" ","") != HangMan.word):
+        # After every guess, either the word is progressively guessed OR the number of guesses is incremented until the number of guesses is equal to the number of guesses allowed
         HangMan.calculatePoints()
         banner(HangMan, session, 3)
         guess = input("Guess: ")
         HangMan.guessLetter(guess)
-    if(HangMan.guesses == 5):
-        print("\nYou lose.")
+    if(HangMan.guesses == settings['guesses']): # if reached max number of guesses
+        print("\nYou have reached the maximum number of guesses. ")
     else:
-        print("\nCongratulations. You win!")
-    print(f"The {HangMan.type} is \"{HangMan.word}\"")
-    if(session < 3):
+        print("\nCongratulations. ")
+    print(f"The {HangMan.type} is \"{HangMan.word}\"") # prints regardless of win/loss
+    if(session < settings['attempts']): # if there are still attempts left, loop until end
         session+=1
         log['points'] += HangMan.calculatePoints()
         print(f"Your total points are {log['points']}.")
         begin(playerName)
     else:
+        if(log['points'] > 15):
+            print("Congratulations! You have won the game! ")
+        else:
+            print("You have lost the game. ")
         log['points'] += HangMan.calculatePoints()
         log['player'] = HangMan.player
         Game.endGame(log)
+
 if(__name__ == "__main__"):
-    
+    settings = gameSettings()
+    padding = '-' * 40
+    session = 1
+    previous_words = []
     log = {
         'player': '',
         'points': 0, 
         'date': date.today().strftime("%d/%m/%y")
     }
-    settings = gameSettings()
     while(1):
         choice = menu() 
         if(choice == 1):
             main()
             break
         elif(choice == 2):
-            print('print lb')
+            printLeaderboard(int(settings['top']))
         elif(choice == 3):
             print('search player on lb')
         elif(choice == 4):
