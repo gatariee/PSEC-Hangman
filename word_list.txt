@@ -1,17 +1,1 @@
-[
-    {
-        "word": "jesus",
-        "type": "word",
-        "difficulty": "easy"
-    },
-    {
-        "word": "octopus",
-        "type": "word",
-        "difficulty": "hard"
-    },
-    {
-        "word": "penis",
-        "type": "word",
-        "difficulty": "easy"
-    }
-]
++

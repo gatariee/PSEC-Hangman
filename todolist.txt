@@ -1,3 +1,0 @@
-- integrate game_settings
-- print leaderboard
-- admin.py entirely
