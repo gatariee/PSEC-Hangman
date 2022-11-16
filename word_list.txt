@@ -1,1 +1,22 @@
-+
+[
+    {
+        "word": "test",
+        "type": "word",
+        "difficulty": "easy"
+    },
+    {
+        "word": "octopus",
+        "type": "word",
+        "difficulty": "medium"
+    },
+    {
+        "word": "kangaroo",
+        "type": "word",
+        "difficulty": "medium"
+    },
+    {
+        "word": "potato",
+        "type": "word",
+        "difficulty": "easy"
+    }
+]

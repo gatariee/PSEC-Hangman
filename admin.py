@@ -181,11 +181,12 @@ def validateInput(input, choice) -> bool:
 def menu() -> int:
     while(1):
         userInput = input("""
-        ************ Welcome to the Admin Panel **************
-                1: Word Settings
-                2: Game Settings
-                3: View reports
-                4: Exit
+        --------------- Welcome to the Admin Panel ---------------
+                Please choose an option:
+                    1: Word Settings
+                    2: Game Settings
+                    3: View reports
+                    4: Exit
         \n>> """)
         check, err = validateInput(userInput, 1)
         if(check):
