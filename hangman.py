@@ -298,7 +298,7 @@ def begin(playerName: str) -> None:
             print(padding2)
             print(f"You have {s.prRed('lost')} the game. ")
         log['points'] += HangMan.calculatePoints()
-        log['player'] = HangMan.player
+        log['player'] = (HangMan.player).capitalize()
         Game.endGame(log)
         replay()
 def replay() -> None:
@@ -356,5 +356,5 @@ if(__name__ == "__main__"):
                 sys.exit()
             input("Press Enter to continue...")
     except KeyboardInterrupt:
-        print("Thank you for playing. ")
+        print(s.prRed(("\nThank you for playing. ")))
         sys.exit()

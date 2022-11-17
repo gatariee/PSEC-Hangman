@@ -11,12 +11,12 @@
     },
     {
         "player": "Charlie",
-        "points": 11,
+        "points": 10,
         "date": "9/11/22"
     },
     {
-        "player": "Zavier",
-        "points": 6,
-        "date": "16/11/22"
+        "player": "Tom",
+        "points": 20,
+        "date": "17/11/22"
     }
 ]

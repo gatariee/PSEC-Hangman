@@ -1,21 +1,36 @@
 [
     {
-        "word": "test",
+        "word": "also",
         "type": "word",
         "difficulty": "easy"
     },
     {
-        "word": "octopus",
+        "word": "able",
         "type": "word",
-        "difficulty": "medium"
+        "difficulty": "easy"
     },
     {
-        "word": "kangaroo",
+        "word": "acid",
         "type": "word",
-        "difficulty": "medium"
+        "difficulty": "easy"
     },
     {
-        "word": "potato",
+        "word": "aged",
+        "type": "word",
+        "difficulty": "easy"
+    },
+    {
+        "word": "away",
+        "type": "word",
+        "difficulty": "easy"
+    },
+    {
+        "word": "baby",
+        "type": "word",
+        "difficulty": "easy"
+    },
+    {
+        "word": "back",
         "type": "word",
         "difficulty": "easy"
     }
