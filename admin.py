@@ -20,7 +20,7 @@ def banner(num):
             print(f"\t\t\t{s.prBold('5')}: {s.prRed('*** Reset Words ***')}")
             t.sleep(0.05)
             print(f"\t\t\t{s.prBold('6')}: Back")
-    if(num == 2):
+    elif(num == 2):
 
         print(s.prGreen((r""" █████╗ ██████╗ ███╗   ███╗██╗███╗   ██╗    ██████╗  █████╗ ███╗   ██╗███████╗██╗     
 ██╔══██╗██╔══██╗████╗ ████║██║████╗  ██║    ██╔══██╗██╔══██╗████╗  ██║██╔════╝██║     
@@ -29,10 +29,10 @@ def banner(num):
 ██║  ██║██████╔╝██║ ╚═╝ ██║██║██║ ╚████║    ██║     ██║  ██║██║ ╚████║███████╗███████╗
 ╚═╝  ╚═╝╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝
                                                                                       """)))
-    if(num == 3):
+    elif(num == 3):
             os.system('cls')
             print(s.prBold((f"{padding} ~ MENU ~ {padding}\n")))
-            print(f"\tYou have selected: {s.prBold('Word Settings')}\n\n{s.prBold(padding * 2 + '==========')}\n")
+            print(f"\tYou have selected: {s.prBold('Game Settings')}\n\n{s.prBold(padding * 2 + '==========')}\n")
             print(f"\t\t{s.prBold('1')}: Edit number of sessions")
             t.sleep(0.05)
             print(f"\t\t{s.prBold('2')}: Edit number of attempts/guesses")
@@ -40,6 +40,15 @@ def banner(num):
             print(f"\t\t{s.prBold('3')}: Edit number of top players")
             t.sleep(0.05)
             print(f"\t\t{s.prBold('4')}: Back\n")
+    elif(num == 4):
+            os.system('cls')
+            print(s.prBold((f"{padding} ~ MENU ~ {padding}\n")))
+            print(f"\tYou have selected: {s.prBold('View Reports')}\n\n{s.prBold(padding * 2 + '==========')}\n")
+            print(f"\t\t{s.prBold('1')}: Print Leaderboard")
+            t.sleep(0.05)
+            print(f"\t\t{s.prBold('2')}: Report Settings")
+            t.sleep(0.05)
+            print(f"\t\t{s.prBold('3')}: Back")
 def wordSettings():
     def addWord() -> None:
         def autoDiff(word):
@@ -317,6 +326,51 @@ def gameSettings():
             input("Press Enter to continue...")
         settingsMenu()
     settingsMenu()
+def viewLeaderboard():
+    def printTop() -> None:
+        logs = readLogs()
+        if(len(logs) == 0):
+            print("No logs found.")
+            input("Press Enter to continue...")
+            return
+        else:
+            logs.sort(key=lambda x: x['score'], reverse=True)
+            print(f"{padding}\n{padding}\n")
+            for i in range(len(logs)):
+                print(f"\t\t{s.prBold(i+1)}: {logs[i]['player']} - {logs[i]['points']}")
+            print(f"\n{padding * 2}\n")
+            input("Press Enter to continue...")
+    def readLogs() -> dict:
+        try:
+            with open('game_logs.txt', 'r') as f:
+                obj = (ast.literal_eval(f.read()))
+                return obj
+        except:
+            print("Error. Leaderboard not found. ")
+            return
+    def settingsMenu() -> int:
+        while(1):
+            banner(4)
+            choice = input(">> ")
+            check, err = validateInput(choice, [1,2,3])
+            if(check):
+                break
+            else:
+                print(err)
+                input("Press Enter to continue...")
+        choice = int(choice)
+        if(choice == 1):
+            printTop()
+            input("Press Enter to continue...")
+        elif(choice == 2):
+            print('')
+        elif(choice == 3):
+            return
+        else:
+            print("Invalid input. Please try again.")
+            input("Press Enter to continue...")
+        settingsMenu()
+    settingsMenu()
 def validateInput(input, options) -> bool:
     if(options == 'int'):
         if(not input.isnumeric()):
@@ -392,8 +446,7 @@ def main() -> None:
         elif(choice == 2):
             gameSettings()
         elif(choice == 3):
-            print("WIP")
-            input("Press Enter to continue...")
+            viewLeaderboard()
         elif(choice == 4):
             print("Exiting...")
             exit()

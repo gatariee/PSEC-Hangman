@@ -39,13 +39,13 @@ class Game:
         def verifyGuess(guess):
             if(not guess.isalpha()):
                 os.system('cls')
-                print(f"{padding}\nPlease enter a letter.")
+                print(s.prRed(f"{padding}\nPlease enter a letter."))
             elif(len(guess) != 1):
                 os.system('cls')
-                print(f"{padding}\nPlease enter a single letter. ")
+                print(s.prRed(f"{padding}\nPlease enter a single letter. "))
             elif(guess in self.previous_guesses):
                 os.system('cls')
-                print(f"{padding}\nYou already guessed that letter. ")
+                print(s.prRed(f"{padding}\nYou already guessed that letter. "))
             else:
                 return True
         if(not verifyGuess(letter)):
@@ -90,7 +90,6 @@ class Game:
         word, type, difficulty = wordlist[randIndex]['word'], wordlist[randIndex]['type'], wordlist[randIndex]['difficulty']
         return word, type, difficulty
 def menu() -> int:
-    # loop until check is true
     while(1):
         os.system('cls')
         HMBanner()
@@ -181,7 +180,7 @@ def validateInput(input, choice: int) -> bool:
     if(choice == 1): # Name validation
         alphabets_lower = list(map(chr, range(97, 123)))
         alphabets_upper = list(map(chr, range(65, 91)))
-        special_chars = ['-','/']
+        special_chars = ['-','/','!']
         allowed_chars = alphabets_upper + alphabets_lower + special_chars
         if(not all(char in allowed_chars for char in input) or len(input) == 0):
             return False, "Please enter a valid name. "
@@ -195,21 +194,21 @@ def validateInput(input, choice: int) -> bool:
             return True, None
     elif(choice == 2): # menu validation
         if(not input.isnumeric()):
-            return False, "Please enter a valid option."
+            return False, s.prRed("Please enter a valid option.")
         options = [1,2,3,4]
         for option in options:
             if(int(input) == option):
                 return True, None
-        return False, "Please enter a valid option. "
+        return False, s.prRed("Please enter a valid option. ")
     elif(choice == 3):
         options = ['Y', 'N', 'y', 'n']
         if(input not in options):
-            return False, "Please enter a valid option. "
+            return False, s.prRed("Please enter a valid option. ")
         else:
             if(input == 'Y' or input == 'y'):
                 return True, None
             elif(input == 'N' or input == 'n'):
-                print("Thanks for playing! ")
+                print(s.prGreen("Thanks for playing! "))
                 exit()
 def printLeaderboard(num) -> None:
     def readLogs():
@@ -344,7 +343,7 @@ if(__name__ == "__main__"):
             'date': date.today().strftime("%d/%m/%y")
         }
         while(1):
-            choice = menu() 
+            choice = menu()
             if(choice == 1):
                 main()
                 break
@@ -353,6 +352,7 @@ if(__name__ == "__main__"):
             elif(choice == 3):
                 searchPlayer()
             elif(choice == 4):
+                print(s.prRed(("\nThank you for playing. ")))
                 sys.exit()
             input("Press Enter to continue...")
     except KeyboardInterrupt:

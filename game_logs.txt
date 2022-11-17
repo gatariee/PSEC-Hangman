@@ -18,5 +18,10 @@
         "player": "Tom",
         "points": 20,
         "date": "17/11/22"
+    },
+    {
+        "player": "Ethanliao",
+        "points": 24,
+        "date": "17/11/22"
     }
 ]
