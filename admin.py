@@ -29,6 +29,17 @@ def banner(num):
 ██║  ██║██████╔╝██║ ╚═╝ ██║██║██║ ╚████║    ██║     ██║  ██║██║ ╚████║███████╗███████╗
 ╚═╝  ╚═╝╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝
                                                                                       """)))
+    if(num == 3):
+            os.system('cls')
+            print(s.prBold((f"{padding} ~ MENU ~ {padding}\n")))
+            print(f"\tYou have selected: {s.prBold('Word Settings')}\n\n{s.prBold(padding * 2 + '==========')}\n")
+            print(f"\t\t{s.prBold('1')}: Edit number of sessions")
+            t.sleep(0.05)
+            print(f"\t\t{s.prBold('2')}: Edit number of attempts/guesses")
+            t.sleep(0.05)
+            print(f"\t\t{s.prBold('3')}: Edit number of top players")
+            t.sleep(0.05)
+            print(f"\t\t{s.prBold('4')}: Back\n")
 def wordSettings():
     def addWord() -> None:
         def autoDiff(word):
@@ -182,7 +193,7 @@ def wordSettings():
         while(1):
             banner(1)
             choice = input(">> ")
-            check, err = validateInput(choice, 1)
+            check, err = validateInput(choice, [1,2,3,4,5,6])
             if(check):
                 break
             else:
@@ -212,11 +223,109 @@ def wordSettings():
             input("Press Enter to continue...")
         settingsMenu()
     settingsMenu()
-def validateInput(input, choice) -> bool:
-    if(not input.isnumeric()):
-        return False, s.prRed("Invalid input. Please try again.")
-    if(choice == 1):
-        options = [1,2,3,4,5,6]
+def gameSettings():
+    def readSettings() -> dict:
+        try:
+            with open('game_settings.txt', 'r') as f:
+                obj = (ast.literal_eval(f.read()))
+                return obj
+        except:
+            print("Error. Settings not found. ")
+            return
+    def writeSettings(obj) -> None:
+        try:
+            with open('game_settings.txt', 'w') as f:
+                new = json.dumps(obj, indent=4)
+                f.seek(0)
+                f.truncate(0)
+                f.write(str(new))
+                f.close()
+                return
+        except:
+            print("Error. Settings not found. ")
+            return
+    def editSession() -> None:
+        settings = readSettings()
+        while(1):
+            os.system('cls')
+            print(f"{padding}\nCurrent number of sessions: {settings['number of attempts']}\n{padding}")
+            session = input("Enter new number of sessions: ")
+            check, err = validateInput(session, 'int')
+            if(check):
+                settings['number of attempts'] = int(session)
+                writeSettings(settings)
+                print(s.prGreen("Successfully updated number of sessions."))
+                break
+            else:
+                print(err)
+                input("Press Enter to continue...")
+    def editGuesses() -> None:
+        settings = readSettings()
+        while(1):
+            os.system('cls')
+            print(f"{padding}\nCurrent number of guesses: {settings['number of guesses']}\n{padding}")
+            guesses = input("Enter new number of guesses: ")
+            check, err = validateInput(guesses, 'int')
+            if(check):
+                settings['number of guesses'] = int(guesses)
+                writeSettings(settings)
+                print(s.prGreen("Successfully updated number of guesses."))
+                break
+            else:
+                print(err)
+                input("Press Enter to continue...")
+    def editTop() -> None:
+        settings = readSettings()
+        while(1):
+            os.system('cls')
+            print(f"{padding}\nCurrent number of top scores: {settings['number of top players']}\n{padding}")
+            top = input("Enter new number of top scores: ")
+            check, err = validateInput(top, 'int')
+            if(check):
+                settings['number of top '] = int(top)
+                writeSettings(settings)
+                print(s.prGreen("Successfully updated number of top scores."))
+                break
+            else:
+                print(err)
+                input("Press Enter to continue...")
+    def settingsMenu() -> int:
+        while(1):
+            banner(3)
+            babypadding = "-" * 10
+            print(f"{babypadding*5}\nCurrent game settings: \n\n\tNumber of sessions: {readSettings()['number of attempts']}")
+            print(f"\tNumber of guesses per session: {readSettings()['number of guesses']}")
+            print(f"\tNumber of top players on leaderboard: {readSettings()['number of top players']}\n\n{babypadding*5}")
+            choice = input(">> ")
+            check, err = validateInput(choice, [1,2,3,4])
+            if(check):
+                break
+            else:
+                print(err)
+                input("Press Enter to continue...")
+        choice = int(choice)
+        if(choice == 1):
+            editSession()
+        elif(choice == 2):
+            editGuesses()
+        elif(choice == 3):
+            editTop()
+        elif(choice == 4):
+            return
+        else:
+            print("Invalid input. Please try again.")
+            input("Press Enter to continue...")
+        settingsMenu()
+    settingsMenu()
+def validateInput(input, options) -> bool:
+    if(options == 'int'):
+        if(not input.isnumeric()):
+            return False, s.prRed("Invalid input. Please try again.")
+        else:
+            return True, ""
+    else:
+        if(not input.isnumeric()):
+            return False, s.prRed("Invalid input. Please try again.")
         if int(input) not in options:
             return False, s.prRed("Invalid input. Please try again.")
         else:
@@ -237,7 +346,7 @@ def menu() -> int:
         print(f"\t\t{s.prBold('4')}: Exit\n\n{s.prBold(padding * 2 + '==========')}\n")
         t.sleep(0.05)
         userInput = input(">> ")
-        check, err = validateInput(userInput, 1)
+        check, err = validateInput(userInput, [1,2,3,4])
         if(check):
             return int(userInput)
         else:
@@ -281,8 +390,7 @@ def main() -> None:
         if(choice == 1):
             wordSettings()
         elif(choice == 2):
-            print("WIP")
-            input("Press Enter to continue...")
+            gameSettings()
         elif(choice == 3):
             print("WIP")
             input("Press Enter to continue...")

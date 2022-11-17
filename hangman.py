@@ -190,7 +190,7 @@ def validateInput(input, choice: int) -> bool:
                 with open("./game_logs.txt", 'r') as f:
                     gameLogs = (ast.literal_eval(f.read()))
                     for value in gameLogs:
-                        if(value['player'] == input):
+                        if(value['player'].lower() == input.lower()):
                             return False, "This name is already taken. "
             return True, None
     elif(choice == 2): # menu validation
