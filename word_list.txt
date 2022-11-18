@@ -23,15 +23,5 @@
         "word": "away",
         "type": "word",
         "difficulty": "easy"
-    },
-    {
-        "word": "baby",
-        "type": "word",
-        "difficulty": "easy"
-    },
-    {
-        "word": "back",
-        "type": "word",
-        "difficulty": "easy"
     }
 ]
