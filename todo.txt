@@ -1,3 +1,0 @@
-1. reset leaderboard
-2. remove log
-3. search log between date
