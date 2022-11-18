@@ -1,5 +1,7 @@
 .env
 *.pdf
-export-*.csv
 __pycache__
 .venv
+todo.txt
+.gitattributes
+test.py

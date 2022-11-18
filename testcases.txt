@@ -1,0 +1,10 @@
+// ONLY ACCEPT NUMERIC ANSWERS //
+    abc
+    !!!
+
+    1.1
+    1.0
+    <any number out of range>
+    
+
+// ONLY ACCEPT STRINGS FROM (a-z, A-Z, )

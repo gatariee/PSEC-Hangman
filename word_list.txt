@@ -1,27 +1,17 @@
 [
     {
-        "word": "also",
-        "type": "word",
+        "word": "rice",
+        "meaning": "i like asians",
+        "difficulty": "simple"
+    },
+    {
+        "word": "city",
+        "meaning": "lol",
         "difficulty": "easy"
     },
     {
-        "word": "able",
-        "type": "word",
-        "difficulty": "easy"
-    },
-    {
-        "word": "acid",
-        "type": "word",
-        "difficulty": "easy"
-    },
-    {
-        "word": "aged",
-        "type": "word",
-        "difficulty": "easy"
-    },
-    {
-        "word": "away",
-        "type": "word",
+        "word": "cash",
+        "meaning": "money",
         "difficulty": "easy"
     }
 ]

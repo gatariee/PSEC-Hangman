@@ -85,7 +85,7 @@ def add_word() -> None:
         diff = "medium"
     else:
         diff = "hard"
-    new_word = {"word": word, "type": input("Enter Type: ").lower(), "difficulty": diff}
+    new_word = {"word": word, "meaning": input("Enter meaning: ").lower(), "difficulty": diff}
     with open("word_list.txt", "r+") as f:
         if os.stat("word_list.txt").st_size == 0:
             obj = []
@@ -119,8 +119,8 @@ def remove_word() -> None:
             )
             if word.isnumeric():
                 check, index = (True, int(word) - 1) if (0 < int(word) <= len(obj)) else (False, 0)
-            for i, word in enumerate(obj):
-                if word["word"].lower() == word.lower() or check:
+            for i, item in enumerate(obj):
+                if item["word"].lower() == word.lower() or check:
                     if index != 0:
                         i = index
                     print(f"{obj[i]['word']} has been removed from the word list.")
@@ -152,7 +152,7 @@ def edit_word() -> None:
         for i in range(len(obj)):
             print(f"\t\t{s.pr_bold(i+1)}: {obj[i]['word']}")
         word = input(
-            f"\n{padding*2}\nEnter the word you want to remove ('0' to exit):  "
+            f"\n{padding*2}\nEnter the word you want to edit ('0' to exit):  "
         )
         if word.isnumeric():
             check, index = (True, int(word) - 1) if (0 < int(word) <= len(obj)) else (False, 0)
@@ -163,11 +163,11 @@ def edit_word() -> None:
                         i = index
                     print(padding * 2)
                     print("\n\tCurrent word: ", obj[i]["word"])
-                    print("\tCurrent type: ", obj[i]["type"])
+                    print("\tCurrent meaning: ", obj[i]["meaning"])
                     print("\tCurrent difficulty: ", obj[i]["difficulty"] + "\n")
                     print(padding * 2)
                     print(f"\n{s.pr_bold('1')}: Edit word")
-                    print(f"{s.pr_bold('2')}: Edit type")
+                    print(f"{s.pr_bold('2')}: Edit meaning")
                     print(f"{s.pr_bold('3')}: Edit difficulty")
                     print(f"{s.pr_bold('4')}: Save and exit")
                     choice = input(">> ")
@@ -175,7 +175,7 @@ def edit_word() -> None:
                     if choice == "1":
                         obj[i]["word"] = input("Enter new word: ")
                     elif choice == "2":
-                        obj[i]["type"] = input("Enter new type: ")
+                        obj[i]["meaning"] = input("Enter new meaning: ")
                     elif choice == "3":
                         obj[i]["difficulty"] = input("Enter new difficulty: ")
                     elif choice == "4":
@@ -183,7 +183,7 @@ def edit_word() -> None:
                     else:
                         print("Invalid input. Please try again.")
                         input("Press Enter to continue...")
-                print(f"These are the new values\n\tWord: {obj[i]['word']}\n\tType: {obj[i]['type']}\n\tDifficulty: {obj[i]['difficulty']}")
+                print(f"These are the new values\n\tWord: {obj[i]['word']}\n\tType: {obj[i]['meaning']}\n\tDifficulty: {obj[i]['difficulty']}")
                 new = json.dumps(obj, indent=4)
                 with open("word_list.txt", "w") as f:
                     f.seek(0)
@@ -465,6 +465,7 @@ def main() -> None:
             print(s.pr_red(("Invalid input. Please try again.")))
             input("Press Enter to continue...")
 if __name__ == "__main__":
+    os.system('cls')
     try:
         padding = "=" * 25
         main()
