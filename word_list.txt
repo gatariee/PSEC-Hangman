@@ -13,5 +13,10 @@
         "word": "cash",
         "meaning": "money",
         "difficulty": "easy"
+    },
+    {
+        "word": "nice",
+        "meaning": "it's a word idk what u want from me",
+        "difficulty": "easy"
     }
 ]

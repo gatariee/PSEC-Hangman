@@ -4,6 +4,8 @@ import os
 import hashlib
 import time as t
 from styles import Styles as s
+from getpass import getpass
+import datetime 
 def banner(num):
     if num == 1:
         os.system("cls")
@@ -71,7 +73,7 @@ def banner(num):
         )
         print(f"\t\t{s.pr_bold('1')}: Print Leaderboard")
         t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('2')}: Report Settings")
+        print(f"\t\t{s.pr_bold('2')}: Filter Log")
         t.sleep(0.05)
         print(f"\t\t{s.pr_bold('3')}: Back")
 #######
@@ -79,12 +81,10 @@ def add_word() -> None:
     word = input('Enter Word ("0" to exit): ').lower()
     if word == "0":
         return
-    if len(word) <= 4:
-        diff = "easy"
-    elif len(word) <= 7: 
-        diff = "medium"
+    elif len(word) < 7: 
+        diff = "simple"
     else:
-        diff = "hard"
+        diff = "complex"
     new_word = {"word": word, "meaning": input("Enter meaning: ").lower(), "difficulty": diff}
     with open("word_list.txt", "r+") as f:
         if os.stat("word_list.txt").st_size == 0:
@@ -294,48 +294,102 @@ def edit_top() -> None:
             print(err)
             input("Press Enter to continue...")
 #######
-def view_leaderboard():
-    def print_top() -> None:
-        logs = read_logs()
-        if len(logs) == 0:
-            print("No logs found.")
-            input("Press Enter to continue...")
-        else:
-            logs.sort(key=lambda x: x["score"], reverse=True)
-            print(f"{padding}\n{padding}\n")
-            for i in range(len(logs)):
-                print(f"\t\t{s.pr_bold(i+1)}: {logs[i]['player']} - {logs[i]['points']}")
-            print(f"\n{padding * 2}\n")
-            input("Press Enter to continue...")
-    def read_logs() -> dict:
-        try:
-            with open("game_logs.txt", "r") as f:
-                obj = ast.literal_eval(f.read())
-                return obj
-        except FileNotFoundError:
-            print("Error. Leaderboard not found. ")
-    def settings_menu():
+def print_top() -> None:
+    os.system('cls')
+    logs = read_logs()
+    if len(logs) == 0:
+        print("No logs found.")
+        input("Press Enter to continue...")
+    else:
+        logs.sort(key=lambda x: x["points"], reverse=True)
+        print(f"{padding*3}")
+        print(f"\t{s.pr_bold('Rank')}\t\t{s.pr_bold('Name')}\t\t{s.pr_bold('Points')}")
+        print(f"{padding*3}")
+        for i, log in enumerate(logs, start = 1):
+            print(f"\t{s.pr_bold(i)}\t\t{log['player']}\t\t{log['points']}")
+        print(f"\n{padding * 3}\n")
+        input("Press Enter to continue...")
+def read_logs() -> dict:
+    try:
+        with open("game_logs.txt", "r") as f:
+            obj = ast.literal_eval(f.read())
+            return obj
+    except FileNotFoundError:
+        print("Error. Leaderboard not found. ")
+
+def search_logs():
+    logs = read_logs()
+    if len(logs) == 0:
+        print("No logs found.")
+        input("Press Enter to continue...")
+    else:
         while 1:
-            banner(4)
+            os.system("cls")
+            print(f"{padding*2}\n")
+            print(f"\t{s.pr_bold('1')}: Search by name")
+            print(f"\t{s.pr_bold('2')}: Search by date")
+            print(f"\t{s.pr_bold('3')}: Back")
+            print(f"\n{padding*2}\n")
             choice = input(">> ")
-            check, err = validate_input(choice, [1, 2, 3])
-            if check:
+            if choice == "1":
+                search_name()
+            elif choice == "2":
+                search_date()
+            elif choice == "3":
                 break
             else:
-                print(err)
+                print(s.pr_red("Invalid input. Please try again."))
                 input("Press Enter to continue...")
-        choice = int(choice)
-        if choice == 1:
-            print_top()
+def search_name():
+    logs = read_logs()
+    name = input("Enter name: ")
+    for log in logs:
+        if log["player"] == name:
+            print(f"{padding*2}\n")
+            print(f"\t{s.pr_bold('Name')}: {log['player']}")
+            print(f"\t{s.pr_bold('Points')}: {log['points']}")
+            print(f"\t{s.pr_bold('Date')}: {log['date']}")
+            print(f"\n{padding*2}\n")
             input("Press Enter to continue...")
-        elif choice == 2:
-            print("")
-        elif choice == 3:
             return
+    print("Player not found.")
+    input("Press Enter to continue...")
+def search_date():
+    start_date = input("Enter start date (dd/mm/yy): ")
+    end_date = input("Enter end date (dd/mm/yy): ")
+    if(start_date > end_date):
+        print("Start date can not be larger than end date.")
+        input("Press Enter to continue...")
+        return
+    elif((start_date == end_date) or (start_date == "" and end_date == "")):
+        print("Invalid date range.")
+        input("Press Enter to continue...")
+        return
+    try:
+        list_of_players = []
+        os.system('cls')
+        start_date_ugly = datetime.datetime.strptime(start_date, "%d/%m/%y")
+        end_date_ugly = datetime.datetime.strptime(end_date, "%d/%m/%y")
+        logs = read_logs()
+        if logs is None:
+            return
+        for player in logs:
+            date = datetime.datetime.strptime(player["date"], "%d/%m/%y")
+            if start_date_ugly <= date <= end_date_ugly:
+                list_of_players.append(player)
+        if(len(list_of_players) == 0):
+            print("No results found.")
         else:
-            print("Invalid input. Please try again.")
-            input("Press Enter to continue...")
-    settings_menu()
+            print(f"\nShowing {len(list_of_players)} results between {start_date} and {end_date}...")
+            print(f"{padding*3}")
+            print(f"\t{s.pr_bold('Name')}\t\t{s.pr_bold('Points')}\t\t{s.pr_bold('Date')}\n")
+            for player in list_of_players:
+                print(f"\t{player['player']}\t\t{player['points']}\t\t{player['date']}\n")
+            print(f"{padding*3}")
+        input("Press Enter to continue...")
+    except ValueError:
+        print("Error. Invalid date format. ")
+        input("Press Enter to continue...")
 def validate_input(userin, options):
     if options == "int":
         if not userin.isnumeric():
@@ -386,7 +440,7 @@ def check_login(username: str, password: str) -> bool:
 def login(attempts: int):
     print(s.pr_bold((f"{padding} ~ LOGIN ~ {padding}")))
     username = input(s.pr_bold("Username: "))
-    password = input(s.pr_bold("Password: "))
+    password = getpass(s.pr_bold("Password: "))
     if check_login(username, password):
         print("Successfully logged in.")
         return True, attempts
@@ -441,6 +495,25 @@ def word_menu():
             else:
                 print("Invalid input. Please try again.")
                 input("Press Enter to continue...")
+def reports_menu():
+    while 1:
+        banner(4)
+        choice = input(">> ")
+        check, err = validate_input(choice, [1, 2, 3])
+        if not check:
+            print(err)
+            input("Press Enter to continue...")
+        else:
+            choice = int(choice)
+            if choice == 1:
+                print_top()
+            elif choice == 2:
+                search_logs()
+            elif choice == 3:
+                return
+            else:
+                print("Invalid input. Please try again.")
+                input("Press Enter to continue...")
 def main() -> None:
     attempts = 3
     while attempts >= 0:
@@ -457,7 +530,7 @@ def main() -> None:
         elif choice == 2:
             game_menu()
         elif choice == 3:
-            view_leaderboard()
+            reports_menu()
         elif choice == 4:
             print("Exiting...")
             exit()
