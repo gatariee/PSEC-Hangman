@@ -81,7 +81,7 @@ def add_word() -> None:
         return
     if len(word) <= 4:
         diff = "easy"
-    elif len(word) <= 7:
+    elif len(word) <= 7: 
         diff = "medium"
     else:
         diff = "hard"
