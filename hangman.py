@@ -11,7 +11,7 @@ class Game:
     def __init__(self, player: str) -> None:
         self.player = player
         self.session = session
-        self.word, self.type, self.difficulty = pick_word()
+        self.word, self.meaning, self.difficulty = pick_word()
         self.guesses = 0
         self.previous_guesses = []
         self.incorrect_list = []
@@ -107,12 +107,12 @@ def pick_word():
     while rand_index in previous_words:
         rand_index = random.randint(0, len(wordlist) - 1)
     previous_words.append(rand_index)
-    word, word_type, difficulty = (
+    word, word_meaning, difficulty = (
         wordlist[rand_index]["word"],
-        wordlist[rand_index]["type"],
+        wordlist[rand_index]["meaning"],
         wordlist[rand_index]["difficulty"],
     )
-    return word, word_type, difficulty
+    return word, word_meaning, difficulty
 
 
 def menu() -> int:
@@ -362,7 +362,7 @@ def begin(player_name: str) -> bool:
         print(s.pr_red("\nYou have reached the maximum number of guesses. "))
     else:
         print(s.pr_green("\nWell Done! You have guessed the word. "))
-    print(f'The {hang_man.type} was "{hang_man.word}"')
+    print(f'The word was "{hang_man.word}". It\'s meaning is: \'{hang_man.meaning}\'')
     if session < settings["attempts"]:
         session += 1
         log["points"] += hang_man.calculate_points()
