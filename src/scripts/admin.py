@@ -43,7 +43,7 @@ def banner(num):
         )
     elif num == 3:
         try:
-            with open("game_settings.txt", "r") as f:
+            with open("../data/game_settings.txt", "r") as f:
                 obj = ast.literal_eval(f.read())
         except FileNotFoundError:
             print("Error. Settings not found. ")
@@ -116,8 +116,8 @@ def add_word() -> None:
         "difficulty": diff,
         "type": word_type
     }
-    with open("word_list.txt", "r+") as f:
-        if os.stat("word_list.txt").st_size == 0:
+    with open("../data/word_list.txt", "r+") as f:
+        if os.stat("../data/word_list.txt").st_size == 0:
             obj = []
             obj.append(new_word)
         else:
@@ -146,7 +146,7 @@ def add_word() -> None:
 
 
 def remove_word() -> None:
-    with open("word_list.txt", "r+") as f:
+    with open("../data/word_list.txt", "r+") as f:
         obj = ast.literal_eval(f.read())
         while 1:
             check, index = False, 0
@@ -183,7 +183,7 @@ def remove_word() -> None:
 
 def edit_word() -> None:
     try:
-        with open("word_list.txt", "r+") as f:
+        with open("../data/word_list.txt", "r+") as f:
             obj = ast.literal_eval(f.read())
             f.close()
     except FileNotFoundError:
@@ -232,7 +232,7 @@ def edit_word() -> None:
                     f"These are the new values\n\tWord: {obj[i]['word']}\n\tType: {obj[i]['meaning']}\n\tDifficulty: {obj[i]['difficulty']}"
                 )
                 new = json.dumps(obj, indent=4)
-                with open("word_list.txt", "w") as f:
+                with open("../data/word_list.txt", "w") as f:
                     f.seek(0)
                     f.truncate(0)
                     f.write(str(new))
@@ -247,11 +247,11 @@ def edit_word() -> None:
 
 def view_words() -> None:
     try:
-        if(os.stat("word_list.txt").st_size == 0):
+        if(os.stat("../data/word_list.txt").st_size == 0):
             print("Wordist is empty.")
             input("Press Enter to continue...")
             return
-        with open("word_list.txt", "r") as f:
+        with open("../data/word_list.txt", "r") as f:
             obj = ast.literal_eval(f.read())
             print(f"There are currently {len(obj)} words in the word list.\n")
             print(padding * 4 + "\n")
@@ -266,7 +266,7 @@ def view_words() -> None:
 
 def reset_words() -> None:
     try:
-        with open("word_list.txt", "w") as f:
+        with open("../data/word_list.txt", "w") as f:
             f.truncate(0)
             f.close()
             print("Successfully reset word list.")
@@ -279,7 +279,7 @@ def reset_words() -> None:
 #######
 def read_settings() -> dict:
     try:
-        with open("game_settings.txt", "r") as f:
+        with open("../data/game_settings.txt", "r") as f:
             obj = ast.literal_eval(f.read())
             return obj
     except FileNotFoundError:
@@ -288,7 +288,7 @@ def read_settings() -> dict:
 
 def write_settings(obj) -> None:
     try:
-        with open("game_settings.txt", "w") as f:
+        with open("../data/game_settings.txt", "w") as f:
             new = json.dumps(obj, indent=4)
             f.seek(0)
             f.truncate(0)
@@ -380,7 +380,7 @@ def print_top() -> None:
 
 def read_logs() -> dict:
     try:
-        with open("game_logs.txt", "r") as f:
+        with open("../data/game_logs.txt", "r") as f:
             obj = ast.literal_eval(f.read())
             return obj
     except FileNotFoundError:
@@ -416,7 +416,7 @@ def search_name():
     logs = read_logs()
     name = input("Enter name: ")
     for log in logs:
-        if log["player"] == name:
+        if log["player"].lower() == name.lower():
             print(f"{padding*2}\n")
             print(f"\t{s.pr_bold('Name')}: {log['player']}")
             print(f"\t{s.pr_bold('Points')}: {log['points']}")
@@ -477,7 +477,7 @@ def search_date():
 # def view admins
 def read_admins():
     try:
-        with open("./admin.txt", "r") as f:
+        with open("../data/admin.txt", "r") as f:
             obj = ast.literal_eval(f.read())
             return obj
     except FileNotFoundError:
@@ -488,7 +488,7 @@ def read_admins():
 
 def write_admins(obj) -> None:
     try:
-        with open("./admin.txt", "w") as f:
+        with open("../data/admin.txt", "w") as f:
             new = json.dumps(obj, indent=4)
             f.seek(0)
             f.truncate(0)
@@ -635,7 +635,7 @@ def menu() -> int:
 
 def check_login(username: str, password: str) -> bool:
     try:
-        with open("./admin.txt", "r") as f:
+        with open("../data/admin.txt", "r") as f:
             obj = ast.literal_eval(f.read())
     except Exception as e:
         print(e)

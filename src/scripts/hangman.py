@@ -436,3 +436,38 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print(s.pr_red(("\nThank you for playing. ")))
         sys.exit()
+
+    # Program Flow:
+
+    # 1. User runs the program -> if(__name__ == "__main__"): main()
+    # 2. User is prompted to login -> login() is called by main() which returns a boolean value and the number of attempts left
+    # ^^ If login() returns True, the user is logged in and menu() is called, else the user is prompted to try again
+    # 3. User is presented with the main menu -> menu() is called by main() which returns an integer value
+    # 4. User is presented with the sub-menu for the option they chose
+    # -> 1. word_menu(), 2. game_menu(), or 3. reports_menu()
+    # 5. banner(x) is called by the sub-menu function to display the sub-menu
+
+    """"
+        Word Settings:                                  word_menu()
+            1. Add word calls                               add_word()
+            2. Remove word calls                            remove_word()
+            3. Edit word calls                              edit_word()
+            4. View words calls                             view_words()
+            5. Reset words calls                            reset_words()
+            6. Exit returns from word_menu() to             menu()
+    
+        Game Settings:                                  game_menu()
+            1. Edit session calls                           edit_session()
+            2. Edit guesses calls                           edit_guesses()
+            3. Edit top calls                               edit_top()
+            4. Exit returns from game_menu() to             menu()
+
+        View reports:                                   reports_menu()
+            1. Print top calls                              print_top()
+            2. Search logs calls                            search_logs()
+                2.1 Search by name calls                        search_by_name()
+                2.2 Search by date calls                        search_by_date()
+                2.3 Exit returns from search_logs() to          reports_menu()
+            3. Exit returns from reports_menu() to          menu()
+
+    """
