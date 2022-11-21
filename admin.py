@@ -5,7 +5,9 @@ import hashlib
 import time as t
 from styles import Styles as s
 from getpass import getpass
-import datetime 
+import datetime
+
+
 def banner(num):
     if num == 1:
         os.system("cls")
@@ -76,16 +78,44 @@ def banner(num):
         print(f"\t\t{s.pr_bold('2')}: Filter Log")
         t.sleep(0.05)
         print(f"\t\t{s.pr_bold('3')}: Back")
+    elif num == 5:
+        os.system("cls")
+        print(s.pr_bold((f"{padding} ~ MENU ~ {padding}\n")))
+        print(
+            f"\tYou have selected: {s.pr_bold('Admin Settings')}\n\n{s.pr_bold(padding * 2 + '==========')}\n"
+        )
+        print(f"\t\t{s.pr_bold('1')}: Create Admin")
+        t.sleep(0.05)
+        print(f"\t\t{s.pr_bold('2')}: Delete Admin")
+        t.sleep(0.05)
+        print(f"\t\t{s.pr_bold('3')}: View Admins")
+        t.sleep(0.05)
+        print(f"\t\t{s.pr_bold('4')}: Back")
+
+
 #######
 def add_word() -> None:
     word = input('Enter Word ("0" to exit): ').lower()
     if word == "0":
         return
-    elif len(word) < 7: 
-        diff = "simple"
+    if(' ' in word):
+        word_type = 'Idioms-Proverbs'
+        if(len(word.split()) > 8):
+            diff = 'Complex'
+        else:
+            diff = 'Simple'
     else:
-        diff = "complex"
-    new_word = {"word": word, "meaning": input("Enter meaning: ").lower(), "difficulty": diff}
+        word_type = 'Word'
+        if(len(word) > 8):
+            diff = 'Complex'
+        else:
+            diff = 'Simple'
+    new_word = {
+        "word": word,
+        "meaning": input("Enter meaning: ").lower(),
+        "difficulty": diff,
+        "type": word_type
+    }
     with open("word_list.txt", "r+") as f:
         if os.stat("word_list.txt").st_size == 0:
             obj = []
@@ -103,8 +133,18 @@ def add_word() -> None:
         f.truncate(0)
         f.write(str(new))
         f.close()
-        print(f"Successfully added {new_word['word']} to the word list.")
+        os.system('cls')
+        print(
+            (f"Successfully added \"{s.pr_bold(new_word['word'])}\" to the word list.")
+        )
+        print(padding*2)
+        print(f"The following attributes have been automatically added to the word: \n")
+        print(f"\tDifficulty: {s.pr_bold(new_word['difficulty'])}")
+        print(f"\tType: {s.pr_bold(new_word['type'])}\n")
+        print(padding*2)
         input("Press Enter to continue...")
+
+
 def remove_word() -> None:
     with open("word_list.txt", "r+") as f:
         obj = ast.literal_eval(f.read())
@@ -118,7 +158,9 @@ def remove_word() -> None:
                 f"\n{padding*2}\nEnter the word you want to remove ('0' to exit):  "
             )
             if word.isnumeric():
-                check, index = (True, int(word) - 1) if (0 < int(word) <= len(obj)) else (False, 0)
+                check, index = (
+                    (True, int(word) - 1) if (0 < int(word) <= len(obj)) else (False, 0)
+                )
             for i, item in enumerate(obj):
                 if item["word"].lower() == word.lower() or check:
                     if index != 0:
@@ -137,6 +179,8 @@ def remove_word() -> None:
             else:
                 print("Word not found. Please try again.")
                 input("Press Enter to continue...")
+
+
 def edit_word() -> None:
     try:
         with open("word_list.txt", "r+") as f:
@@ -147,15 +191,15 @@ def edit_word() -> None:
         return
     while 1:
         check, index = False, 0
-        os.system("cls")
+        os.system("cls") 
         print(padding * 2 + "\n")
         for i in range(len(obj)):
             print(f"\t\t{s.pr_bold(i+1)}: {obj[i]['word']}")
-        word = input(
-            f"\n{padding*2}\nEnter the word you want to edit ('0' to exit):  "
-        )
+        word = input(f"\n{padding*2}\nEnter the word you want to edit ('0' to exit):  ")
         if word.isnumeric():
-            check, index = (True, int(word) - 1) if (0 < int(word) <= len(obj)) else (False, 0)
+            check, index = (
+                (True, int(word) - 1) if (0 < int(word) <= len(obj)) else (False, 0)
+            )
         for i in range(len(obj)):
             if (obj[i]["word"] == word.lower()) or check:
                 while 1:
@@ -164,6 +208,7 @@ def edit_word() -> None:
                     print(padding * 2)
                     print("\n\tCurrent word: ", obj[i]["word"])
                     print("\tCurrent meaning: ", obj[i]["meaning"])
+                    print("\tCurrent type: ", obj[i]["type"])
                     print("\tCurrent difficulty: ", obj[i]["difficulty"] + "\n")
                     print(padding * 2)
                     print(f"\n{s.pr_bold('1')}: Edit word")
@@ -183,7 +228,9 @@ def edit_word() -> None:
                     else:
                         print("Invalid input. Please try again.")
                         input("Press Enter to continue...")
-                print(f"These are the new values\n\tWord: {obj[i]['word']}\n\tType: {obj[i]['meaning']}\n\tDifficulty: {obj[i]['difficulty']}")
+                print(
+                    f"These are the new values\n\tWord: {obj[i]['word']}\n\tType: {obj[i]['meaning']}\n\tDifficulty: {obj[i]['difficulty']}"
+                )
                 new = json.dumps(obj, indent=4)
                 with open("word_list.txt", "w") as f:
                     f.seek(0)
@@ -196,19 +243,27 @@ def edit_word() -> None:
         else:
             print("Word not found. Please try again.")
             input("Press Enter to continue...")
+
+
 def view_words() -> None:
     try:
+        if(os.stat("word_list.txt").st_size == 0):
+            print("Wordist is empty.")
+            input("Press Enter to continue...")
+            return
         with open("word_list.txt", "r") as f:
             obj = ast.literal_eval(f.read())
             print(f"There are currently {len(obj)} words in the word list.\n")
-            print(padding * 2 + "\n")
+            print(padding * 4 + "\n")
             for i in range(len(obj)):
                 print(f"\t\t{s.pr_bold(i+1)}: {obj[i]['word']}")
-            print(f"\n{padding * 2}\n")
+            print(f"\n{padding * 4}\n")
     except FileNotFoundError:
-        print("Error. Wordlist is empty or not found. ")
+        print("Error. Please contact an administrator")
         return
     input("Press Enter to continue...")
+
+
 def reset_words() -> None:
     try:
         with open("word_list.txt", "w") as f:
@@ -219,6 +274,8 @@ def reset_words() -> None:
     except FileNotFoundError:
         print("Error. Wordlist not found. ")
         return
+
+
 #######
 def read_settings() -> dict:
     try:
@@ -227,6 +284,8 @@ def read_settings() -> dict:
             return obj
     except FileNotFoundError:
         print("Error. Settings not found. ")
+
+
 def write_settings(obj) -> None:
     try:
         with open("game_settings.txt", "w") as f:
@@ -239,6 +298,8 @@ def write_settings(obj) -> None:
     except FileNotFoundError:
         print("Error. Settings not found. ")
         return
+
+
 def edit_session() -> None:
     settings = read_settings()
     while 1:
@@ -257,6 +318,8 @@ def edit_session() -> None:
         else:
             print(err)
             input("Press Enter to continue...")
+
+
 def edit_guesses() -> None:
     settings = read_settings()
     while 1:
@@ -275,6 +338,8 @@ def edit_guesses() -> None:
         else:
             print(err)
             input("Press Enter to continue...")
+
+
 def edit_top() -> None:
     settings = read_settings()
     while 1:
@@ -293,9 +358,11 @@ def edit_top() -> None:
         else:
             print(err)
             input("Press Enter to continue...")
+
+
 #######
 def print_top() -> None:
-    os.system('cls')
+    os.system("cls")
     logs = read_logs()
     if len(logs) == 0:
         print("No logs found.")
@@ -305,10 +372,12 @@ def print_top() -> None:
         print(f"{padding*3}")
         print(f"\t{s.pr_bold('Rank')}\t\t{s.pr_bold('Name')}\t\t{s.pr_bold('Points')}")
         print(f"{padding*3}")
-        for i, log in enumerate(logs, start = 1):
+        for i, log in enumerate(logs, start=1):
             print(f"\t{s.pr_bold(i)}\t\t{log['player']}\t\t{log['points']}")
         print(f"\n{padding * 3}\n")
         input("Press Enter to continue...")
+
+
 def read_logs() -> dict:
     try:
         with open("game_logs.txt", "r") as f:
@@ -316,6 +385,7 @@ def read_logs() -> dict:
             return obj
     except FileNotFoundError:
         print("Error. Leaderboard not found. ")
+
 
 def search_logs():
     logs = read_logs()
@@ -340,6 +410,8 @@ def search_logs():
             else:
                 print(s.pr_red("Invalid input. Please try again."))
                 input("Press Enter to continue...")
+
+
 def search_name():
     logs = read_logs()
     name = input("Enter name: ")
@@ -354,20 +426,22 @@ def search_name():
             return
     print("Player not found.")
     input("Press Enter to continue...")
+
+
 def search_date():
     start_date = input("Enter start date (dd/mm/yy): ")
     end_date = input("Enter end date (dd/mm/yy): ")
-    if(start_date > end_date):
+    if start_date > end_date:
         print("Start date can not be larger than end date.")
         input("Press Enter to continue...")
         return
-    elif((start_date == end_date) or (start_date == "" and end_date == "")):
+    elif (start_date == end_date) or (start_date == "" and end_date == ""):
         print("Invalid date range.")
         input("Press Enter to continue...")
         return
     try:
         list_of_players = []
-        os.system('cls')
+        os.system("cls")
         start_date_ugly = datetime.datetime.strptime(start_date, "%d/%m/%y")
         end_date_ugly = datetime.datetime.strptime(end_date, "%d/%m/%y")
         logs = read_logs()
@@ -377,19 +451,146 @@ def search_date():
             date = datetime.datetime.strptime(player["date"], "%d/%m/%y")
             if start_date_ugly <= date <= end_date_ugly:
                 list_of_players.append(player)
-        if(len(list_of_players) == 0):
+        if len(list_of_players) == 0:
             print("No results found.")
         else:
-            print(f"\nShowing {len(list_of_players)} results between {start_date} and {end_date}...")
+            print(
+                f"\nShowing {len(list_of_players)} results between {start_date} and {end_date}..."
+            )
             print(f"{padding*3}")
-            print(f"\t{s.pr_bold('Name')}\t\t{s.pr_bold('Points')}\t\t{s.pr_bold('Date')}\n")
+            print(
+                f"\t{s.pr_bold('Name')}\t\t{s.pr_bold('Points')}\t\t{s.pr_bold('Date')}\n"
+            )
             for player in list_of_players:
-                print(f"\t{player['player']}\t\t{player['points']}\t\t{player['date']}\n")
+                print(
+                    f"\t{player['player']}\t\t{player['points']}\t\t{player['date']}\n"
+                )
             print(f"{padding*3}")
         input("Press Enter to continue...")
     except ValueError:
         print("Error. Invalid date format. ")
         input("Press Enter to continue...")
+
+#######
+# def add admin
+# def remove admin
+# def view admins
+def read_admins():
+    try:
+        with open("./admin.txt", "r") as f:
+            obj = ast.literal_eval(f.read())
+            return obj
+    except FileNotFoundError:
+        print("Error. Admins not found. ")
+        input("Press Enter to continue...")
+        return
+
+
+def write_admins(obj) -> None:
+    try:
+        with open("./admin.txt", "w") as f:
+            new = json.dumps(obj, indent=4)
+            f.seek(0)
+            f.truncate(0)
+            f.write(str(new))
+            f.close()
+            return
+    except FileNotFoundError:
+        print("Error. Settings not found. ")
+        return
+
+
+def add_admin():
+    username = input("Enter username: ")
+    password = input("Enter password: ")
+    # Password Requirements
+    numbers = '1234567890'
+    checknum = False
+    sp_chars = '!@#$%'
+    check_sp = False
+    check_len = False
+    uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    check_uppercase = False
+    lowercase = 'abcdefghijklmnopqrstuvwxyz'
+    check_lowercase = False
+    num_string = f"Contains at least one number {s.pr_red('✘')}"
+    sp_string = f"Contains at least one special character {s.pr_red('✘')}"
+    len_string = f"Contains between 4 and 20 characters {s.pr_red('✘')}"
+    upper_string = f"Contains at least one uppercase letter {s.pr_red('✘')}"
+    lower_string = f"Contains at least one lowercase letter {s.pr_red('✘')}"
+    if 4 < len(password) < 20:
+        check_len = True
+        len_string = f"Contains between 4 and 20 characters {s.pr_green('✔')}"
+    for i in password:
+        if i in numbers:
+            checknum = True
+            num_string = f"Contains at least one number {s.pr_green('✔')}"
+        if i in sp_chars:
+            check_sp = True
+            sp_string = f"Contains at least one special character {s.pr_green('✔')}"
+        if i in uppercase:
+            check_uppercase = True
+            upper_string = f"Contains at least one uppercase letter {s.pr_green('✔')}"
+        if i in lowercase:
+            check_lowercase = True
+            lower_string = f"Contains at least one lowercase letter {s.pr_green('✔')}"
+    if not(checknum and check_sp and check_len and check_uppercase and check_lowercase):
+        os.system('cls')
+        print("Password does not meet requirements.")
+        print(padding*3)
+        print(len_string + "\n" + num_string + "\n" + sp_string + "\n" + upper_string + "\n" + lower_string)
+        print(padding*3)
+        input("Press Enter to continue...")
+        return
+
+    if username == "" or password == "":
+        print("Error. Username or password cannot be empty.")
+        input("Press Enter to continue...")
+        return
+    admins = read_admins()
+    for admin in admins:
+        if admin["username"] == username:
+            print("Error. Username already exists.")
+            input("Press Enter to continue...")
+            return
+    password = hashlib.sha256(password.encode()).hexdigest()
+    admins.append({"username": username, "password": password})
+    write_admins(admins)
+    os.system('cls')
+    print(s.pr_green(f"Successfully added '{username}' as admin."))
+    input("Press Enter to continue...")
+
+def remove_admin():
+    username = input("Enter username: ")
+    admins = read_admins()
+    for admin in admins:
+        if admin["username"] == username:
+            admins.remove(admin)
+            write_admins(admins)
+            os.system('cls')
+            print(s.pr_green(f"Successfully removed '{username}' as admin."))
+            input("Press Enter to continue...")
+            return
+    print("Error. Username not found.")
+    input("Press Enter to continue...")
+
+def view_admins():
+    admins = read_admins()
+    if len(admins) == 0:
+        print("No admins found.")
+        input("Press Enter to continue...")
+    else:
+        os.system("cls")
+        print(f"\nShowing {len(admins)} admins...")
+        print(f"{padding*4}")
+        print(f"\t{s.pr_bold('Username')}\t\t{s.pr_bold('Password (hashed)')}\n")
+        for admin in admins:
+            print(f"\t{admin['username']}\t\t{admin['password']}\n")
+        print(f"{padding*4}")
+        input("Press Enter to continue...")
+
+
+
 def validate_input(userin, options):
     if options == "int":
         if not userin.isnumeric():
@@ -403,6 +604,8 @@ def validate_input(userin, options):
             return False, s.pr_red("Invalid input. Please try again.")
         else:
             return True, ""
+
+
 def menu() -> int:
     while 1:
         os.system("cls")
@@ -414,17 +617,22 @@ def menu() -> int:
         t.sleep(0.05)
         print(f"\t\t{s.pr_bold('2')}: Game Settings")
         t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('3')}: View reports")
+        print(f"\t\t{s.pr_bold('3')}: View Reports")
         t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('4')}: Exit\n\n{s.pr_bold(padding * 2 + '==========')}\n")
+        print(f"\t\t{s.pr_bold('4')}: Admin Settings")
+        print(
+            f"\t\t{s.pr_bold('5')}: Exit\n\n{s.pr_bold(padding * 2 + '==========')}\n"
+        )
         t.sleep(0.05)
         user_input = input(">> ")
-        check, err = validate_input(user_input, [1, 2, 3, 4])
+        check, err = validate_input(user_input, [1, 2, 3, 4, 5])
         if check:
             return int(user_input)
         else:
             print(err)
             input("Press Enter to continue...")
+
+
 def check_login(username: str, password: str) -> bool:
     try:
         with open("./admin.txt", "r") as f:
@@ -437,6 +645,8 @@ def check_login(username: str, password: str) -> bool:
             if (obj[i]["password"]) == hashlib.sha256(password.encode()).hexdigest():
                 return True
     return False
+
+
 def login(attempts: int):
     print(s.pr_bold((f"{padding} ~ LOGIN ~ {padding}")))
     username = input(s.pr_bold("Username: "))
@@ -449,6 +659,8 @@ def login(attempts: int):
             print(f"Invalid credentials. You have {attempts} attempts left.")
         attempts -= 1
         return False, attempts
+
+
 def game_menu():
     while 1:
         banner(3)
@@ -470,6 +682,8 @@ def game_menu():
             else:
                 print("Invalid input. Please try again.")
                 input("Press Enter to continue...")
+
+
 def word_menu():
     while 1:
         banner(1)
@@ -495,6 +709,8 @@ def word_menu():
             else:
                 print("Invalid input. Please try again.")
                 input("Press Enter to continue...")
+
+
 def reports_menu():
     while 1:
         banner(4)
@@ -510,6 +726,27 @@ def reports_menu():
             elif choice == 2:
                 search_logs()
             elif choice == 3:
+                return
+            else:
+                print("Invalid input. Please try again.")
+                input("Press Enter to continue...")
+def admin_menu():
+    while 1:
+        banner(5)
+        choice = input(">> ")
+        check, err = validate_input(choice, [1, 2, 3, 4])
+        if not check:
+            print(err)
+            input("Press Enter to continue...")
+        else:
+            choice = int(choice)
+            if choice == 1:
+                add_admin()
+            elif choice == 2:
+                remove_admin()
+            elif choice == 3:
+                view_admins()
+            elif choice == 4:
                 return
             else:
                 print("Invalid input. Please try again.")
@@ -532,13 +769,17 @@ def main() -> None:
         elif choice == 3:
             reports_menu()
         elif choice == 4:
+            admin_menu()
+        elif choice == 5:
             print("Exiting...")
             exit()
         else:
             print(s.pr_red(("Invalid input. Please try again.")))
             input("Press Enter to continue...")
+
+
 if __name__ == "__main__":
-    os.system('cls')
+    os.system("cls")
     try:
         padding = "=" * 25
         main()

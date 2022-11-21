@@ -1,27 +1,26 @@
 [
     {
-        "word": "you can lead a horse to water but you can't make it drink",
-        "meaning": "i like'nt",
-        "difficulty": "simple"
+        "word": "under the weather",
+        "meaning": "ill or feeling unwell",
+        "difficulty": "Simple",
+        "type": "Idioms-Proverbs"
     },
     {
         "word": "you can lead a horse to water but you can't make it drink",
-        "meaning": "lol",
-        "difficulty": "easy"
+        "meaning": "you can give someone an opportunity, but you can't force them to take it",
+        "difficulty": "Complex",
+        "type": "Idioms-Proverbs"
     },
     {
-        "word": "you can lead a horse to water but you can't make it drink",
-        "meaning": "money",
-        "difficulty": "easy"
+        "word": "able",
+        "meaning": "having the power, skill, means or opportunity to do something",
+        "difficulty": "Simple",
+        "type": "Word"
     },
     {
-        "word": "you can lead a horse to water but you can't make it drink",
-        "meaning": "it's a word idk what u want from me",
-        "difficulty": "easy"
-    },
-    {
-        "word": "you can lead a horse to water but you can't make it drink",
-        "meaning": "you're a cunt ",
-        "difficulty": "complex"
+        "word": "intelligence",
+        "meaning": "the ability to acquire and apply knowledge and skills",
+        "difficulty": "Complex",
+        "type": "Word"
     }
 ]
