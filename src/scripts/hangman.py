@@ -7,27 +7,83 @@ import sys
 from styles import Styles as s
 import time as t
 
+
 class Game:
+    """
+    A class to represent a Player and their game status
+
+    ...
+    Attributes
+    ----------
+    player : str
+        The name of the player
+    session : int
+        The number of the session
+    word : str
+        The word to be guessed
+    meaning : str
+        The meaning of the word
+    difficulty : str
+        The difficulty of the word
+    space : bool
+        Whether the word contains a space
+    index_of_space : int
+        The index of the space in the word
+    guesses : int
+        The number of guesses made
+    previous_guesses : list
+        The list of previous guesses
+    incorrect_list : list
+        The list of incorrect guesses
+    guess_progress : str
+        The current progress of the word
+    total_points : int
+        The total points earned
+
+    Methods
+    -------
+    calculate_points()
+        Calculates the points earned
+    guess_letter(letter: str)
+        Guesses a letter
+    """
+
     def __init__(self, player: str) -> None:
+        """
+        Args:
+            player (str): Input name of player
+        """
         self.player = player
         self.session = session
-        self.word, self.meaning, self.difficulty, self.space, self.index_of_space = pick_word()
-        # self.word chooses a random word from the list of words
-        # self.meaning is the meaning of the word
-        # self.difficulty is the difficulty of the word
-        # if self.space is True, then the word is probably an idiom/phrase
-        # self.space is whether a space is in a word
-        # self.index_of_space is the index of the space in the word
+        (
+            self.word,
+            self.meaning,
+            self.difficulty,
+            self.space,
+            self.index_of_space,
+        ) = pick_word()
         self.guesses = 0
         self.previous_guesses = []
         self.incorrect_list = []
         self.guess_progress = "_ " * len(self.word)
         self.total_points = 0
 
-    def calculate_points(self) -> int:  # called after any probable change in points
+    def calculate_points(self) -> int:
+        """
+        This function is called everything a guess is made and calculates the points earned.
+
+        Returns:
+            int: The points earned
+        """
         return len((self.guess_progress).replace("_", " ").replace(" ", "")) * 2
 
-    def guess_letter(self, letter: str):
+    def guess_letter(self, letter: str) -> None:
+        """
+        The main part of the game where the player guesses a letter.
+
+        Args:
+            letter (str): The letter guessed
+        """
         lowercase_alphabets = "abcdefghijklmnopqrstuvwxyz"
         uppercase_alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         punctuation = "'!?,"
@@ -80,9 +136,9 @@ class Game:
         self.previous_guesses.append(letter)
 
 
-def end_game(log) -> None:
-    with open("./game_logs.txt", "r+") as f:
-        if os.stat("./game_logs.txt").st_size == 0:
+def end_game(log: dict) -> None:
+    with open("../data/game_logs.txt", "r+") as f:
+        if os.stat("../data/game_logs.txt").st_size == 0:
             obj = []
             obj.append(log)
         else:
@@ -99,11 +155,28 @@ def end_game(log) -> None:
     )
 
 
-def pick_word():
-    def read_words():
+def pick_word() -> tuple:
+    """
+    This function picks a random word from the word list.
+
+    Returns:
+        word (str): The word to be guessed
+        word_meaning (str): The meaning of the word
+        difficulty (str): The difficulty of the word
+        space (bool): Whether the word contains a space
+        index_of_space (int): The index of the space in the word
+
+    """
+
+    def read_words() -> list:
+        """_summary_
+
+        Returns:
+            list: This is a list of words
+        """
         global previous_words
         try:
-            with open("word_list.txt", "r") as f:
+            with open("../data/word_list.txt", "r") as f:
                 wordlist = ast.literal_eval(f.read())
                 return wordlist
         except:
@@ -126,20 +199,30 @@ def pick_word():
     index_of_space = []
     for letter in enumerate(word):
         if letter[1] == " ":
-            word = word[:letter[0]] + "_" + word[letter[0] + 1 :]
+            word = word[: letter[0]] + "_" + word[letter[0] + 1 :]
             index_of_space.append(letter[0])
             space = True
     return word, word_meaning, difficulty, space, index_of_space
 
 
 def menu() -> int:
+    """
+    This function is the main menu of the game.
+
+    Returns:
+        user_input (int): The option chosen
+    """
     while 1:
         os.system("cls")
-        print('\n\n')
+        print("\n\n")
         t.sleep(0.1)
         hm_banner()  # ascii art
         t.sleep(0.05)
-        print(s.pr_bold(f"\n---------------------------- ~ MENU ~ -----------------------------\n"))
+        print(
+            s.pr_bold(
+                f"\n---------------------------- ~ MENU ~ -----------------------------\n"
+            )
+        )
         t.sleep(0.05)
         print(s.pr_bold(f"                        1. Start new game\n"))
         t.sleep(0.05)
@@ -149,13 +232,21 @@ def menu() -> int:
         t.sleep(0.05)
         print(s.pr_bold(f"                        4. Exit\n"))
         user_input = input(">> ")
-        check, err = validate_input(user_input, 2)
+        check, err = validate_input(user_input = user_input, choice = 2)
         if check:
             return int(user_input)
         input(f"{err}\nPress Enter to continue...")
 
 
 def banner(game: object, session: int, choice: int) -> None:
+    """
+    This function prints the banner of the game.
+
+    Args:
+        game (object): This is the game object
+        session (int): This is the session number
+        choice (int): This is the choice of the player
+    """
     if choice == 1:
         os.system("cls")
         print("Your word is " + str(len(game.word)) + " letters long. ")
@@ -168,11 +259,13 @@ def banner(game: object, session: int, choice: int) -> None:
             + f"\n{padding}"
         )
     elif choice == 3:
-        if(len(game.index_of_space) > 0):
+        if len(game.index_of_space) > 0:
             # replace the underscores with spaces
             new_guess_progress = game.guess_progress
             for i in game.index_of_space:
-                new_guess_progress = new_guess_progress[:i*2] + ' ' + new_guess_progress[i*2+1:]
+                new_guess_progress = (
+                    new_guess_progress[: i * 2] + " " + new_guess_progress[i * 2 + 1 :]
+                )
             print(f"Word: {new_guess_progress}")
         else:
             print(f"Word: " + game.guess_progress)
@@ -181,10 +274,13 @@ def banner(game: object, session: int, choice: int) -> None:
             f"Correct Guesses: {', '.join(list(set(game.previous_guesses) - set(game.incorrect_list)))}"
         )
         print("Guesses remaining: " + str(settings["guesses"] - game.guesses))
-        print_hangman(game.guesses)
+        print_hangman(guess_num = game.guesses)
 
 
 def hm_banner():
+    """
+    This function prints the banner of the game.
+    """
     print(
         s.pr_red(
             r"""                                                      
@@ -198,70 +294,90 @@ def hm_banner():
     )
 
 
-def print_hangman(guess_num: int) -> str:
-    if guess_num == 0:
-        print(
-            r"""            +---+
-            |   |
-                |
-                |
-                |
-                |
-            ========="""
-        )
-    elif guess_num == 1:
-        print(
-            r"""            +---+
-            |   |
-            O   |
-            |   |
-                |
-                |
-            ========="""
-        )
-    elif guess_num == 2:
-        print(
-            r"""            +---+
-            |   |
-            O   |
-           /|   |
-                |
-                |
-            ========="""
-        )
-    elif guess_num == 3:
-        print(
-            r"""            +---+
-            |   |
-            O   |
-           /|\  |
-                |
-                |
-            ========="""
-        )
-    elif guess_num == 4:
-        print(
-            r"""            +---+
-            |   |
-            O   |
-           /|\  |
-           /    |
-                |
-            ========="""
-        )
-    elif guess_num == 5:
-        print(
-            r"""            +---+
-            |   |
-            O   |
-           /|\  |
-           / \  |
-                |
-            ========="""
-        )
+def print_hangman(guess_num: int) -> None:
+    """
+    This function prints the hangman ascii art.
+
+    Arguments:
+        guess_num {int}: This is the number of guesses the player has made
+
+    """
+    match guess_num:
+        case 0:
+            print(
+                r"""            +---+
+                |   |
+                    |
+                    |
+                    |
+                    |
+                ========="""
+            )
+        case 1:
+            print(
+                r"""            +---+
+                |   |
+                O   |
+                |   |
+                    |
+                    |
+                ========="""
+            )
+        case 2:
+            print(
+                r"""            +---+
+                |   |
+                O   |
+            /|   |
+                    |
+                    |
+                ========="""
+            )
+        case 3:
+            print(
+                r"""            +---+
+                |   |
+                O   |
+            /|\  |
+                    |
+                    |
+                ========="""
+            )
+        case 4:
+            print(
+                r"""            +---+
+                |   |
+                O   |
+            /|\  |
+            /    |
+                    |
+                ========="""
+            )
+        case 5:
+            print(
+                r"""            +---+
+                |   |
+                O   |
+            /|\  |
+            / \  |
+                    |
+                ========="""
+            )
 
 
-def validate_input(user_input, choice: int):
+def validate_input(user_input, choice: int) -> tuple:
+    """
+    _summary_
+
+    Args:
+        user_input (str/int): this is the user input, could be a string or an integer. name or option
+        choice (int): this is the choice of validation. 1 for name, 2 for option, 3 for Y/N
+
+    Returns:
+        tuple(bool,str):
+            bool: True if the input is valid, False if the input is invalid
+            str: the error message if the input is invalid
+    """
     if choice == 1:
         alphabets_lower = list(map(chr, range(97, 123)))
         alphabets_upper = list(map(chr, range(65, 91)))
@@ -273,8 +389,8 @@ def validate_input(user_input, choice: int):
         ):
             return False, "Please enter a valid name. "
         else:
-            if os.stat("./game_logs.txt").st_size != 0:
-                with open("./game_logs.txt", "r") as f:
+            if os.stat("../data/game_logs.txt").st_size != 0:
+                with open("../data/game_logs.txt", "r") as f:
                     game_log = ast.literal_eval(f.read())
                     for value in game_log:
                         if value["player"].lower() == user_input.lower():
@@ -300,10 +416,23 @@ def validate_input(user_input, choice: int):
                 exit()
 
 
-def print_leaderboard(num) -> None:
-    def read_logs():
+def print_leaderboard(num: int) -> None:
+    """
+    _summary_
+
+    Args:
+        num (_type_): this is the number of players to be displayed in the leaderboard
+    """
+
+    def read_logs() -> dict:
+        """
+        This function reads the game logs and returns a dictionary of the logs
+
+        Returns:
+            logs (dict): this is the game log
+        """
         try:
-            with open("game_logs.txt", "r") as f:
+            with open("../data/game_logs.txt", "r") as f:
                 logs = ast.literal_eval(f.read())
                 return logs
         except FileNotFoundError:
@@ -320,9 +449,19 @@ def print_leaderboard(num) -> None:
 
 
 def search_player() -> None:
-    def read_logs():
+    """
+    This function searches for a player in the game logs
+    """
+
+    def read_logs() -> dict:
+        """
+        This function reads the game logs and returns a dictionary of the logs
+
+        Returns:
+            logs (dict): this is the game log
+        """
         try:
-            with open("game_logs.txt", "r") as f:
+            with open("../data/game_logs.txt", "r") as f:
                 logs = ast.literal_eval(f.read())
                 return logs
         except FileNotFoundError:
@@ -338,8 +477,14 @@ def search_player() -> None:
 
 
 def game_settings() -> object:
+    """
+    This function returns the game settings
+
+    Returns:
+        game_settings (object): the game settings
+    """
     try:
-        with open("./game_settings.txt") as f:
+        with open("../data/game_settings.txt") as f:
             game_settings = ast.literal_eval(f.read())
             game_settings["attempts"] = game_settings["number of attempts"]
             game_settings["guesses"] = game_settings["number of guesses"]
@@ -357,56 +502,69 @@ def game_settings() -> object:
 
 
 def main():
+    """
+    This is the main function
+    """
     while 1:  # loops until check is true
         player_name = input("Enter your name: ")
-        check, err = validate_input(player_name, 1)
+        check, err = validate_input(user_input = player_name, choice = 1)
         if check:
-            begin(player_name)
+            begin(player_name = player_name)
             break
         else:
             print(err)
 
 
-def begin(player_name: str) -> bool:
+def begin(player_name: str) -> None:
+    """
+    this function begins the game
+
+    Args:
+        player_name (str): this is the player's name
+    """
     global session
     hang_man = Game(player_name)
     if session == 1:
-        banner(hang_man, session, 1)
-        banner(hang_man, session, 2)
+        banner(game = hang_man, session = session, choice = 1)
+        banner(game = hang_man, session = session, choice = 2)
     else:
-        banner(hang_man, session, 2)
+        banner(game = hang_man, session = session, choice = 2)
     while (hang_man.guesses < settings["guesses"]) and (
         (hang_man.guess_progress).replace(" ", "") != hang_man.word
     ):
         hang_man.calculate_points()
-        banner(hang_man, session, 3)
+        banner(game = hang_man, session = session, choice = 3)
         guess = input("Guess: ")
-        hang_man.guess_letter(guess)
+        hang_man.guess_letter(letter = guess)
         print(padding)
     if hang_man.guesses == settings["guesses"]:
         print(s.pr_red("\nYou have reached the maximum number of guesses. "))
     else:
         print(s.pr_green("\nWell Done! You have guessed the word. "))
-    if(hang_man.space == False):
-        print(f'After {len(hang_man.incorrect_list)} incorrect guesses and {len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. The word was "{hang_man.word}". It\'s meaning is: \'{hang_man.meaning}\'')
+    if hang_man.space == False:
+        print(
+            f"After {len(hang_man.incorrect_list)} incorrect guesses and {len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. The word was \"{hang_man.word}\". It's meaning is: '{hang_man.meaning}'"
+        )
     else:
-        formatted_word = (hang_man.word).replace('_',' ')
-        print(f'After {len(hang_man.incorrect_list)} incorrect guesses and {len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. The word was "{formatted_word}". It\'s meaning is: \'{hang_man.meaning}\'')
+        formatted_word = (hang_man.word).replace("_", " ")
+        print(
+            f"After {len(hang_man.incorrect_list)} incorrect guesses and {len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. The word was \"{formatted_word}\". It's meaning is: '{hang_man.meaning}'"
+        )
     if session < settings["attempts"]:
         session += 1
         log["points"] += hang_man.calculate_points()
-        print(f"Your total points are {s.pr_bold(log['points'])}.")
+        print(f"Your total points are {s.pr_bold(s = log['points'])}.")
         begin(player_name)
     else:
         if log["points"] > 15:
             print(padding2)
-            print(f"Congratulations! You have {s.pr_green('won')} the game! ")
+            print(f"Congratulations! You have {s.pr_green(s = 'won')} the game! ")
         else:
             print(padding2)
-            print(f"You have {s.pr_red('lost')} the game. ")
+            print(f"You have {s.pr_red(s = 'lost')} the game. ")
         log["points"] += hang_man.calculate_points()
         log["player"] = (hang_man.player).capitalize()
-        end_game(log)
+        end_game(log = log)
 
 
 if __name__ == "__main__":
@@ -426,11 +584,11 @@ if __name__ == "__main__":
                 }
                 main()
             elif choice == 2:
-                print_leaderboard(int(settings["top"]))
+                print_leaderboard(num=int(settings["top"]))
             elif choice == 3:
                 search_player()
             elif choice == 4:
-                print(s.pr_red(("\nThank you for playing. ")))
+                print(s.pr_red("\nThank you for playing. "))
                 sys.exit()
             input("Press Enter to continue...")
     except KeyboardInterrupt:

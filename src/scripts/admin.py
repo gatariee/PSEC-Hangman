@@ -472,9 +472,6 @@ def search_date():
         input("Press Enter to continue...")
 
 #######
-# def add admin
-# def remove admin
-# def view admins
 def read_admins():
     try:
         with open("../data/admin.txt", "r") as f:
@@ -496,28 +493,29 @@ def write_admins(obj) -> None:
             f.close()
             return
     except FileNotFoundError:
-        print("Error. Settings not found. ")
+        print("Error. Admin.txt not found. ")
         return
 
 
 def add_admin():
     username = input("Enter username: ")
     password = input("Enter password: ")
-    # Password Requirements
+    ##
     numbers = '1234567890'
-    checknum = False
     sp_chars = '!@#$%'
-    check_sp = False
-    check_len = False
     uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    check_uppercase = False
     lowercase = 'abcdefghijklmnopqrstuvwxyz'
-    check_lowercase = False
     num_string = f"Contains at least one number {s.pr_red('✘')}"
     sp_string = f"Contains at least one special character {s.pr_red('✘')}"
     len_string = f"Contains between 4 and 20 characters {s.pr_red('✘')}"
     upper_string = f"Contains at least one uppercase letter {s.pr_red('✘')}"
     lower_string = f"Contains at least one lowercase letter {s.pr_red('✘')}"
+    check_lowercase = False
+    check_uppercase = False
+    check_sp = False
+    check_len = False
+    checknum = False
+    ##
     if 4 < len(password) < 20:
         check_len = True
         len_string = f"Contains between 4 and 20 characters {s.pr_green('✔')}"
@@ -671,17 +669,18 @@ def game_menu():
             input("Press Enter to continue...")
         else:
             choice = int(choice)
-            if choice == 1:
-                edit_session()
-            elif choice == 2:
-                edit_guesses()
-            elif choice == 3:
-                edit_top()
-            elif choice == 4:
-                return
-            else:
-                print("Invalid input. Please try again.")
-                input("Press Enter to continue...")
+            match choice:
+                case 1:
+                    edit_session()
+                case 2:
+                    edit_guesses()
+                case 3:
+                    edit_top()
+                case 4:
+                    return
+                case _:
+                    print("Invalid input. Please try again.")
+                    input("Press Enter to continue...")
 
 
 def word_menu():
@@ -694,21 +693,22 @@ def word_menu():
             input("Press Enter to continue...")
         else:
             choice = int(choice)
-            if choice == 1:
-                add_word()
-            elif choice == 2:
-                remove_word()
-            elif choice == 3:
-                edit_word()
-            elif choice == 4:
-                view_words()
-            elif choice == 5:
-                reset_words()
-            elif choice == 6:
-                return
-            else:
-                print("Invalid input. Please try again.")
-                input("Press Enter to continue...")
+            match choice:
+                case 1:
+                    add_word()
+                case 2:
+                    remove_word()
+                case 3:
+                    edit_word()
+                case 4:
+                    view_words()
+                case 5:
+                    reset_words()
+                case 6:
+                    return
+                case _:
+                    print("Invalid input. Please try again.")
+                    input("Press Enter to continue...")
 
 
 def reports_menu():
@@ -721,15 +721,16 @@ def reports_menu():
             input("Press Enter to continue...")
         else:
             choice = int(choice)
-            if choice == 1:
-                print_top()
-            elif choice == 2:
-                search_logs()
-            elif choice == 3:
-                return
-            else:
-                print("Invalid input. Please try again.")
-                input("Press Enter to continue...")
+            match choice:
+                case 1:
+                    print_top()
+                case 2:
+                    search_logs()
+                case 3:
+                    return
+                case _:      
+                    print("Invalid input. Please try again.")
+                    input("Press Enter to continue...")
 def admin_menu():
     while 1:
         banner(5)
@@ -740,17 +741,19 @@ def admin_menu():
             input("Press Enter to continue...")
         else:
             choice = int(choice)
-            if choice == 1:
-                add_admin()
-            elif choice == 2:
-                remove_admin()
-            elif choice == 3:
-                view_admins()
-            elif choice == 4:
-                return
-            else:
-                print("Invalid input. Please try again.")
-                input("Press Enter to continue...")
+            match choice:
+                case 1:
+                    add_admin()
+                case 2:
+                    remove_admin()
+                case 3:
+                    view_admins()
+                case 4:
+                    return
+                case _:
+                    print("Invalid input. Please try again.")
+                    input("Press Enter to continue...")
+
 def main() -> None:
     attempts = 3
     while attempts >= 0:
@@ -762,20 +765,22 @@ def main() -> None:
         exit()
     while 1:
         choice = menu()
-        if choice == 1:
-            word_menu()
-        elif choice == 2:
-            game_menu()
-        elif choice == 3:
-            reports_menu()
-        elif choice == 4:
-            admin_menu()
-        elif choice == 5:
-            print("Exiting...")
-            exit()
-        else:
-            print(s.pr_red(("Invalid input. Please try again.")))
-            input("Press Enter to continue...")
+        match choice:
+            case 1:
+                word_menu()
+            case 2:
+                game_menu()
+            case 3:
+                reports_menu()
+            case 4:
+                admin_menu()
+            case 5:
+                print("Exiting...")
+                exit()
+            case _:
+                print(s.pr_red(("Invalid input. Please try again.")))
+                input("Press Enter to continue...")
+
 
 
 if __name__ == "__main__":
