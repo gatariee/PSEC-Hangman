@@ -18,15 +18,5 @@
         "player": "Tom",
         "points": 20,
         "date": "18/11/22"
-    },
-    {
-        "player": "Tari",
-        "points": 10,
-        "date": "19/11/22"
-    },
-    {
-        "player": "Tari-",
-        "points": 18,
-        "date": "19/11/22"
     }
 ]

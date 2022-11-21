@@ -285,7 +285,7 @@ def edit_top() -> None:
         top = input("Enter new number of top scores: ")
         check, err = validate_input(top, "int")
         if check:
-            settings["number of top "] = int(top)
+            settings["number of top players"] = int(top)
             write_settings(settings)
             print(s.pr_green("Successfully updated number of top scores."))
             input("Press Enter to continue...")

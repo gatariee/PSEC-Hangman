@@ -5,13 +5,19 @@ import json
 import os
 import sys
 from styles import Styles as s
-
+import time as t
 
 class Game:
     def __init__(self, player: str) -> None:
         self.player = player
         self.session = session
-        self.word, self.meaning, self.difficulty = pick_word()
+        self.word, self.meaning, self.difficulty, self.space, self.index_of_space = pick_word()
+        # self.word chooses a random word from the list of words
+        # self.meaning is the meaning of the word
+        # self.difficulty is the difficulty of the word
+        # if self.space is True, then the word is probably an idiom/phrase
+        # self.space is whether a space is in a word
+        # self.index_of_space is the index of the space in the word
         self.guesses = 0
         self.previous_guesses = []
         self.incorrect_list = []
@@ -22,16 +28,20 @@ class Game:
         return len((self.guess_progress).replace("_", " ").replace(" ", "")) * 2
 
     def guess_letter(self, letter: str):
+        lowercase_alphabets = "abcdefghijklmnopqrstuvwxyz"
+        uppercase_alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        punctuation = "'!?,"
+        allowed_chars = lowercase_alphabets + uppercase_alphabets + punctuation
         # Validation
         if len(letter) != 1:
             os.system("cls")
             print(padding)
             print(s.pr_red("Please enter a single letter."))
             return
-        if not letter.isalpha():
+        if letter not in allowed_chars:
             os.system("cls")
             print(padding)
-            print(s.pr_red("Please enter a letter."))
+            print(s.pr_red("Please enter a valid character."))
             return
         if letter in self.previous_guesses:
             os.system("cls")
@@ -112,24 +122,32 @@ def pick_word():
         wordlist[rand_index]["meaning"],
         wordlist[rand_index]["difficulty"],
     )
-    return word, word_meaning, difficulty
+    space = False
+    index_of_space = []
+    for letter in enumerate(word):
+        if letter[1] == " ":
+            word = word[:letter[0]] + "_" + word[letter[0] + 1 :]
+            index_of_space.append(letter[0])
+            space = True
+    return word, word_meaning, difficulty, space, index_of_space
 
 
 def menu() -> int:
     while 1:
         os.system("cls")
+        print('\n\n')
+        t.sleep(0.1)
         hm_banner()  # ascii art
-        print(
-            s.pr_bold(
-                """
----------------------------- ~ MENU ~ -----------------------------\n
-                        1. Start new game\n
-                        2. Print leaderboard\n
-                        3. Search player\n
-                        4. Exit\n
-------------------------------------------------------------------\n"""
-            )
-        )
+        t.sleep(0.05)
+        print(s.pr_bold(f"\n---------------------------- ~ MENU ~ -----------------------------\n"))
+        t.sleep(0.05)
+        print(s.pr_bold(f"                        1. Start new game\n"))
+        t.sleep(0.05)
+        print(s.pr_bold(f"                        2. Print leaderboard\n"))
+        t.sleep(0.05)
+        print(s.pr_bold(f"                        3. Search player\n"))
+        t.sleep(0.05)
+        print(s.pr_bold(f"                        4. Exit\n"))
         user_input = input(">> ")
         check, err = validate_input(user_input, 2)
         if check:
@@ -150,7 +168,14 @@ def banner(game: object, session: int, choice: int) -> None:
             + f"\n{padding}"
         )
     elif choice == 3:
-        print("Word: " + game.guess_progress)
+        if(len(game.index_of_space) > 0):
+            # replace the underscores with spaces
+            new_guess_progress = game.guess_progress
+            for i in game.index_of_space:
+                new_guess_progress = new_guess_progress[:i*2] + ' ' + new_guess_progress[i*2+1:]
+            print(f"Word: {new_guess_progress}")
+        else:
+            print(f"Word: " + game.guess_progress)
         print(f"Incorrect Guesses: {', '.join(game.incorrect_list)}")
         print(
             f"Correct Guesses: {', '.join(list(set(game.previous_guesses) - set(game.incorrect_list)))}"
@@ -362,7 +387,11 @@ def begin(player_name: str) -> bool:
         print(s.pr_red("\nYou have reached the maximum number of guesses. "))
     else:
         print(s.pr_green("\nWell Done! You have guessed the word. "))
-    print(f'The word was "{hang_man.word}". It\'s meaning is: \'{hang_man.meaning}\'')
+    if(hang_man.space == False):
+        print(f'After {len(hang_man.incorrect_list)} incorrect guesses and {len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. The word was "{hang_man.word}". It\'s meaning is: \'{hang_man.meaning}\'')
+    else:
+        formatted_word = (hang_man.word).replace('_',' ')
+        print(f'After {len(hang_man.incorrect_list)} incorrect guesses and {len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. The word was "{formatted_word}". It\'s meaning is: \'{hang_man.meaning}\'')
     if session < settings["attempts"]:
         session += 1
         log["points"] += hang_man.calculate_points()
