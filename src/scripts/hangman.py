@@ -10,7 +10,8 @@ import time as t
 
 class Game:
     """
-    A class to represent a Player and their game status
+    A class to represent a Player and their game status. 
+    All game variables are stored in this class
 
     ...
     Attributes
@@ -75,6 +76,8 @@ class Game:
         Returns:
             int: The points earned
         """
+        # (the number of letters in the word, removing underscores) * (2 points per correct guess)
+        # e.g (_est = 3 letters, 2 points per correct guess = 6 points)
         return len((self.guess_progress).replace("_", " ").replace(" ", "")) * 2
 
     def guess_letter(self, letter: str) -> None:
@@ -187,7 +190,7 @@ def pick_word() -> tuple:
 
     wordlist = read_words()
     rand_index = random.randint(0, len(wordlist) - 1)
-    while rand_index in previous_words:
+    while rand_index in previous_words or wordlist[rand_index]['enabled'] != 'on': # checklist: 1.3
         rand_index = random.randint(0, len(wordlist) - 1)
     previous_words.append(rand_index)
     word, word_meaning, difficulty = (
@@ -230,7 +233,9 @@ def menu() -> int:
         t.sleep(0.05)
         print(s.pr_bold(f"                        3. Search player\n"))
         t.sleep(0.05)
-        print(s.pr_bold(f"                        4. Exit\n"))
+        print(s.pr_bold(f"                        4. Game Settings\n"))
+        t.sleep(0.05)
+        print(s.pr_bold(f"                        5. Exit\n"))
         user_input = input(">> ")
         check, err = validate_input(user_input = user_input, choice = 2)
         if check:
@@ -250,15 +255,8 @@ def banner(game: object, session: int, choice: int) -> None:
     if choice == 1:
         os.system("cls")
         print("Your word is " + str(len(game.word)) + " letters long. ")
-    elif choice == 2:
-        print(
-            "Session: "
-            + str(session)
-            + " / "
-            + str(settings["attempts"])
-            + f"\n{padding}"
-        )
     elif choice == 3:
+        print("Session: " + str(session) + " / " + str(settings["attempts"]))
         if len(game.index_of_space) > 0:
             # replace the underscores with spaces
             new_guess_progress = game.guess_progress
@@ -269,7 +267,7 @@ def banner(game: object, session: int, choice: int) -> None:
             print(f"Word: {new_guess_progress}")
         else:
             print(f"Word: " + game.guess_progress)
-        print(f"Incorrect Guesses: {', '.join(game.incorrect_list)}")
+        print(f"Incorrect Guesses ({len(game.incorrect_list)}): {', '.join(game.incorrect_list)}")
         print(
             f"Correct Guesses: {', '.join(list(set(game.previous_guesses) - set(game.incorrect_list)))}"
         )
@@ -366,6 +364,7 @@ def print_hangman(guess_num: int) -> None:
 
 
 def validate_input(user_input, choice: int) -> tuple:
+    # checklist: 1.2 (validate all inputs)
     """
     _summary_
 
@@ -469,6 +468,7 @@ def search_player() -> None:
 
     logs = read_logs()
     name = input("Enter player name: ")
+    # checklist: 1. prompt for player name
     for log in logs:
         if log["player"].lower() == name.lower():
             print(f"{padding}\n{log['player']} - {log['points']} points\n{padding}")
@@ -526,9 +526,6 @@ def begin(player_name: str) -> None:
     hang_man = Game(player_name)
     if session == 1:
         banner(game = hang_man, session = session, choice = 1)
-        banner(game = hang_man, session = session, choice = 2)
-    else:
-        banner(game = hang_man, session = session, choice = 2)
     while (hang_man.guesses < settings["guesses"]) and (
         (hang_man.guess_progress).replace(" ", "") != hang_man.word
     ):
@@ -543,17 +540,20 @@ def begin(player_name: str) -> None:
         print(s.pr_green("\nWell Done! You have guessed the word. "))
     if hang_man.space == False:
         print(
-            f"After {len(hang_man.incorrect_list)} incorrect guesses and {len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. The word was \"{hang_man.word}\". It's meaning is: '{hang_man.meaning}'"
+            f"After {len(hang_man.incorrect_list)} incorrect guesses and {len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. \nThe word was \"{hang_man.word}\".\nIts meaning is: '{hang_man.meaning}'"
         )
     else:
         formatted_word = (hang_man.word).replace("_", " ")
         print(
-            f"After {len(hang_man.incorrect_list)} incorrect guesses and {len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. The word was \"{formatted_word}\". It's meaning is: '{hang_man.meaning}'"
+            f"After {len(hang_man.incorrect_list)} incorrect guesses and {len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. \nThe word was \"{formatted_word}\".\nIts meaning is: '{hang_man.meaning}'"
         )
     if session < settings["attempts"]:
         session += 1
         log["points"] += hang_man.calculate_points()
-        print(f"Your total points are {s.pr_bold(s = log['points'])}.")
+        print(f"Your total points are {s.pr_bold(s = log['points'])}.\n")
+        print(f"{padding}\n")
+        input("Press enter to continue. ")
+        os.system('cls')
         begin(player_name)
     else:
         if log["points"] > 15:
@@ -574,22 +574,24 @@ if __name__ == "__main__":
     try:
         while 1:
             choice = menu()
-            if choice == 1:
-                session = 1
-                previous_words = []
-                log = {
-                    "player": "",
-                    "points": 0,
-                    "date": date.today().strftime("%d/%m/%y"),
-                }
-                main()
-            elif choice == 2:
-                print_leaderboard(num=int(settings["top"]))
-            elif choice == 3:
-                search_player()
-            elif choice == 4:
-                print(s.pr_red("\nThank you for playing. "))
-                sys.exit()
+            match choice:
+                case 1:
+                    session = 1
+                    previous_words = []
+                    log = {
+                        "player": "",
+                        "points": 0,
+                        "date": date.today().strftime("%d/%m/%y"),
+                    }
+                    main()
+                case 2:
+                    print_leaderboard(num=int(settings["top"]))
+                case 3:
+                    search_player()
+                case 4:
+                    print('4')
+                case _:  # default
+                    sys.exit()
             input("Press Enter to continue...")
     except KeyboardInterrupt:
         print(s.pr_red(("\nThank you for playing. ")))

@@ -25,7 +25,9 @@ def banner(num):
         t.sleep(0.05)
         print(f"\t\t\t{s.pr_bold('5')}: {s.pr_red('*** Reset Words ***')}")
         t.sleep(0.05)
-        print(f"\t\t\t{s.pr_bold('6')}: Back")
+        print(f"\t\t\t{s.pr_bold('6')}: Toggle Words")
+        t.sleep(0.05)
+        print(f"\t\t\t{s.pr_bold('7')}: Back")
     elif num == 2:
 
         print(
@@ -77,7 +79,9 @@ def banner(num):
         t.sleep(0.05)
         print(f"\t\t{s.pr_bold('2')}: Filter Log")
         t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('3')}: Back")
+        print(f"\t\t{s.pr_bold('3')}: Remove Log")
+        t.sleep(0.05)
+        print(f"\t\t{s.pr_bold('4')}: Back")
     elif num == 5:
         os.system("cls")
         print(s.pr_bold((f"{padding} ~ MENU ~ {padding}\n")))
@@ -93,7 +97,18 @@ def banner(num):
         print(f"\t\t{s.pr_bold('4')}: Back")
 
 
+
 #######
+def read_words():
+    with open('../data/word_list.txt', "r") as f:
+        return ast.literal_eval(f.read())
+def write_words(words):
+    with open('../data/word_list.txt', "w") as f:
+        f.seek(0)
+        f.truncate(0)
+        f.write(str(words))
+        f.close()
+
 def add_word() -> None:
     word = input('Enter Word ("0" to exit): ').lower()
     if word == "0":
@@ -114,7 +129,8 @@ def add_word() -> None:
         "word": word,
         "meaning": input("Enter meaning: ").lower(),
         "difficulty": diff,
-        "type": word_type
+        "type": word_type,
+        "enabled": 'on'
     }
     with open("../data/word_list.txt", "r+") as f:
         if os.stat("../data/word_list.txt").st_size == 0:
@@ -129,10 +145,7 @@ def add_word() -> None:
                     return
             obj.append(new_word)
         new = json.dumps(obj, indent=4)
-        f.seek(0)
-        f.truncate(0)
-        f.write(str(new))
-        f.close()
+        write_words(new)
         os.system('cls')
         print(
             (f"Successfully added \"{s.pr_bold(new_word['word'])}\" to the word list.")
@@ -146,49 +159,39 @@ def add_word() -> None:
 
 
 def remove_word() -> None:
-    with open("../data/word_list.txt", "r+") as f:
-        obj = ast.literal_eval(f.read())
-        while 1:
-            check, index = False, 0
-            os.system("cls")
-            print(padding * 2 + "\n")
-            for i in range(len(obj)):
-                print(f"\t\t{s.pr_bold(i+1)}: {obj[i]['word']}")
-            word = input(
-                f"\n{padding*2}\nEnter the word you want to remove ('0' to exit):  "
+    obj = read_words()
+    while 1:
+        check, index = False, 0
+        os.system("cls")
+        print(padding * 4 + "\n")
+        for i in range(len(obj)):
+            print(f"\t\t{s.pr_bold(i+1)}: {obj[i]['word']}")
+        word = input(
+            f"\n{padding*4}\nEnter the word you want to remove ('0' to exit):  "
+        )
+        if word.isnumeric():
+            check, index = (
+                (True, int(word) - 1) if (0 < int(word) <= len(obj)) else (False, 0)
             )
-            if word.isnumeric():
-                check, index = (
-                    (True, int(word) - 1) if (0 < int(word) <= len(obj)) else (False, 0)
-                )
-            for i, item in enumerate(obj):
-                if item["word"].lower() == word.lower() or check:
-                    if index != 0:
-                        i = index
-                    print(f"{obj[i]['word']} has been removed from the word list.")
-                    input("Press enter to continue...")
-                    obj.pop(i)
-                    new = json.dumps(obj, indent=4)
-                    f.seek(0)
-                    f.truncate(0)
-                    f.write(str(new))
-                    f.close()
-                    return
-            if word == "0":
+        for i, item in enumerate(obj):
+            if item["word"].lower() == word.lower() or check:
+                if index != 0:
+                    i = index
+                print(f"{obj[i]['word']} has been removed from the word list.")
+                input("Press enter to continue...")
+                obj.pop(i)
+                new = json.dumps(obj, indent=4)
+                write_words(new)
                 return
-            else:
-                print("Word not found. Please try again.")
-                input("Press Enter to continue...")
+        if word == "0":
+            return
+        else:
+            print("Word not found. Please try again.")
+            input("Press Enter to continue...")
 
 
 def edit_word() -> None:
-    try:
-        with open("../data/word_list.txt", "r+") as f:
-            obj = ast.literal_eval(f.read())
-            f.close()
-    except FileNotFoundError:
-        print("Error. Wordlist not found. ")
-        return
+    obj = read_words()
     while 1:
         check, index = False, 0
         os.system("cls") 
@@ -232,11 +235,7 @@ def edit_word() -> None:
                     f"These are the new values\n\tWord: {obj[i]['word']}\n\tType: {obj[i]['meaning']}\n\tDifficulty: {obj[i]['difficulty']}"
                 )
                 new = json.dumps(obj, indent=4)
-                with open("../data/word_list.txt", "w") as f:
-                    f.seek(0)
-                    f.truncate(0)
-                    f.write(str(new))
-                    f.close()
+                write_words(new)
                 return
         if word == "0":
             return
@@ -251,13 +250,15 @@ def view_words() -> None:
             print("Wordist is empty.")
             input("Press Enter to continue...")
             return
-        with open("../data/word_list.txt", "r") as f:
-            obj = ast.literal_eval(f.read())
-            print(f"There are currently {len(obj)} words in the word list.\n")
-            print(padding * 4 + "\n")
-            for i in range(len(obj)):
-                print(f"\t\t{s.pr_bold(i+1)}: {obj[i]['word']}")
-            print(f"\n{padding * 4}\n")
+        obj = read_words()
+        print(f"There are currently {len(obj)} words in the word list.\n")
+        print(padding * 4 + "\n")
+        for i in range(len(obj)):
+            if(obj[i]['enabled'] == 'on'):
+                print(s.pr_green((f"\t{s.pr_bold(i+1)}: {obj[i]['word']}")))
+            else:
+                print(s.pr_red((f"\t{s.pr_bold(i+1)}: {obj[i]['word']}")))
+        print(f"\n{padding * 4}\n")
     except FileNotFoundError:
         print("Error. Please contact an administrator")
         return
@@ -265,17 +266,65 @@ def view_words() -> None:
 
 
 def reset_words() -> None:
-    try:
-        with open("../data/word_list.txt", "w") as f:
-            f.truncate(0)
-            f.close()
-            print("Successfully reset word list.")
+    yn = input("Are you sure you want to reset the word list? (y/n): ")
+    if yn.lower() == "y":
+        try:
+            with open("../data/word_list.txt", "w") as f:
+                f.truncate(0)
+                f.close()
+                print("Successfully reset word list.")
+                input("Press Enter to continue...")
+                return
+        except FileNotFoundError:
+            print("Error. Wordlist not found. ")
             return
-    except FileNotFoundError:
-        print("Error. Wordlist not found. ")
+    else:
         return
-
-
+def status_menu() -> None:
+    while 1:
+        os.system("cls")
+        # print list of words but only showing enabled and type
+        obj = read_words()
+        print(padding * 4 + "\n")
+        enabled_counter = 0
+        disabled_counter = 0
+        for i in range(len(obj)):
+            if(obj[i]['enabled'] == 'on'):
+                enabled_counter += 1
+                print(s.pr_green((f"\t{s.pr_bold(i+1)}: {obj[i]['word']}")))
+            else:
+                disabled_counter += 1
+                print(s.pr_red((f"\t{s.pr_bold(i+1)}: {obj[i]['word']}")))
+        print(f"\n{s.pr_bold('Enabled')}: {enabled_counter}")
+        print(f"{s.pr_bold('Disabled')}: {disabled_counter}")
+        print(f"\n{padding * 4}\n")
+        print(f"{s.pr_bold('1')}: Toggle Words")
+        t.sleep(0.05)
+        print(f"{s.pr_bold('2')}: Toggle Idiom-Proverbs")
+        t.sleep(0.05)
+        print(f"{s.pr_bold('3')}: Toggle Specific")
+        t.sleep(0.05)
+        print(f"{s.pr_bold('4')}: Back")
+        t.sleep(0.05)
+        choice = input(">> ")
+        check, err = validate_input(choice, [1,2,3,4])
+        if(check):
+            choice = int(choice)
+            match choice:
+                case 1:
+                    toggle_words()
+                case 2:
+                    toggle_idioms()
+                case 3:
+                    toggle_specific()
+                case 4:
+                    return
+                case _:
+                    print("Invalid input. Please try again.")
+                    input("Press Enter to continue...")
+        else:
+            print(err)
+            input("Press Enter to continue...")
 #######
 def read_settings() -> dict:
     try:
@@ -359,7 +408,42 @@ def edit_top() -> None:
             print(err)
             input("Press Enter to continue...")
 
+def toggle_words():
+    # only toggle type 'Word'
+    obj = read_words()
+    for i in range(len(obj)):
+        if obj[i]['type'] == 'Word':
+            if obj[i]['enabled'] == 'on':
+                obj[i]['enabled'] = 'off'
+            else:
+                obj[i]['enabled'] = 'on'
+    new = json.dumps(obj, indent=4)
+    write_words(new)
 
+def toggle_idioms():
+    # only toggle type 'Idiom'
+    obj = read_words()
+    for i in range(len(obj)):
+        if obj[i]['type'] == 'Idioms-Proverbs':
+            if obj[i]['enabled'] == 'on':
+                obj[i]['enabled'] = 'off'
+            else:
+                obj[i]['enabled'] = 'on'
+    new = json.dumps(obj, indent=4)
+    write_words(new)
+
+def toggle_specific():
+    obj = read_words()
+    user_input = input("Enter index of word to toggle: ")
+    for i, word in enumerate(obj):
+        if i == int(user_input) - 1:
+            if word['enabled'] == 'on':
+                word['enabled'] = 'off'
+            else:
+                word['enabled'] = 'on'
+    new = json.dumps(obj, indent=4)
+    write_words(new)
+    
 #######
 def print_top() -> None:
     os.system("cls")
@@ -470,6 +554,40 @@ def search_date():
     except ValueError:
         print("Error. Invalid date format. ")
         input("Press Enter to continue...")
+
+def write_logs(obj) -> None:
+    try:
+        with open("../data/game_logs.txt", "w") as f:
+            new = json.dumps(obj, indent=4)
+            f.seek(0)
+            f.truncate(0)
+            f.write(str(new))
+            f.close()
+            return
+    except FileNotFoundError:
+        print("Error. Logs not found. ")
+        return
+
+def remove_log() -> None:
+    logs = read_logs()  
+    print(f"{padding*2}\n")
+    print(f"List of players:")
+    print(f"{padding*2}\n")
+    for i, log in enumerate(logs, start=1):
+        print(f"\t{s.pr_bold(i)}: {log['player']}")
+    print(f"\n{padding*2}\n")
+    name = input("Enter player number to remove: ")
+    try:
+        player_name = logs[int(name) - 1]["player"]
+        logs.pop(int(name) - 1)
+        write_logs(logs)
+        print(f"Successfully removed {s.pr_bold(player_name)}.")
+        input("Press Enter to continue...")
+    except IndexError:
+        print("Player not found. ")
+        input("Press Enter to continue...")
+
+
 
 #######
 def read_admins():
@@ -687,7 +805,7 @@ def word_menu():
     while 1:
         banner(1)
         choice = input(">> ")
-        check, err = validate_input(choice, [1, 2, 3, 4, 5, 6])
+        check, err = validate_input(choice, [1, 2, 3, 4, 5, 6, 7])
         if not check:
             print(err)
             input("Press Enter to continue...")
@@ -705,6 +823,8 @@ def word_menu():
                 case 5:
                     reset_words()
                 case 6:
+                    status_menu()
+                case 7:
                     return
                 case _:
                     print("Invalid input. Please try again.")
@@ -715,7 +835,7 @@ def reports_menu():
     while 1:
         banner(4)
         choice = input(">> ")
-        check, err = validate_input(choice, [1, 2, 3])
+        check, err = validate_input(choice, [1, 2, 3, 4])
         if not check:
             print(err)
             input("Press Enter to continue...")
@@ -727,6 +847,8 @@ def reports_menu():
                 case 2:
                     search_logs()
                 case 3:
+                    remove_log()
+                case 4:
                     return
                 case _:      
                     print("Invalid input. Please try again.")
