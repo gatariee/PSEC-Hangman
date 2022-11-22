@@ -6,7 +6,7 @@ import time as t
 import datetime
 from styles import Styles as s
 from getpass import getpass
-from print import admin_banner as banner
+from banner import admin_banner as banner
 
 # General Functions
 def read_file(file):
