@@ -1,16 +1,16 @@
 import ast
 import random
-from datetime import date
 import json
 import os
 import sys
-from styles import Styles as s
 import time as t
+from datetime import date
+from styles import Styles as s
 
 
 class Game:
     """
-    A class to represent a Player and their game status. 
+    A class to represent a Player and their game status.
     All game variables are stored in this class
 
     ...
@@ -190,7 +190,9 @@ def pick_word() -> tuple:
 
     wordlist = read_words()
     rand_index = random.randint(0, len(wordlist) - 1)
-    while rand_index in previous_words or wordlist[rand_index]['enabled'] != 'on': # checklist: 1.3
+    while (
+        rand_index in previous_words or wordlist[rand_index]["enabled"] != "on"
+    ):  # checklist: 1.3
         rand_index = random.randint(0, len(wordlist) - 1)
     previous_words.append(rand_index)
     word, word_meaning, difficulty = (
@@ -237,7 +239,7 @@ def menu() -> int:
         t.sleep(0.05)
         print(s.pr_bold(f"                        5. Exit\n"))
         user_input = input(">> ")
-        check, err = validate_input(user_input = user_input, choice = 2)
+        check, err = validate_input(user_input=user_input, choice=2)
         if check:
             return int(user_input)
         input(f"{err}\nPress Enter to continue...")
@@ -267,12 +269,14 @@ def banner(game: object, session: int, choice: int) -> None:
             print(f"Word: {new_guess_progress}")
         else:
             print(f"Word: " + game.guess_progress)
-        print(f"Incorrect Guesses ({len(game.incorrect_list)}): {', '.join(game.incorrect_list)}")
+        print(
+            f"Incorrect Guesses ({len(game.incorrect_list)}): {', '.join(game.incorrect_list)}"
+        )
         print(
             f"Correct Guesses: {', '.join(list(set(game.previous_guesses) - set(game.incorrect_list)))}"
         )
         print("Guesses remaining: " + str(settings["guesses"] - game.guesses))
-        print_hangman(guess_num = game.guesses)
+        print_hangman(guess_num=game.guesses)
 
 
 def hm_banner():
@@ -507,9 +511,9 @@ def main():
     """
     while 1:  # loops until check is true
         player_name = input("Enter your name: ")
-        check, err = validate_input(user_input = player_name, choice = 1)
+        check, err = validate_input(user_input=player_name, choice=1)
         if check:
-            begin(player_name = player_name)
+            begin(player_name=player_name)
             break
         else:
             print(err)
@@ -525,14 +529,14 @@ def begin(player_name: str) -> None:
     global session
     hang_man = Game(player_name)
     if session == 1:
-        banner(game = hang_man, session = session, choice = 1)
+        banner(game=hang_man, session=session, choice=1)
     while (hang_man.guesses < settings["guesses"]) and (
         (hang_man.guess_progress).replace(" ", "") != hang_man.word
     ):
         hang_man.calculate_points()
-        banner(game = hang_man, session = session, choice = 3)
+        banner(game=hang_man, session=session, choice=3)
         guess = input("Guess: ")
-        hang_man.guess_letter(letter = guess)
+        hang_man.guess_letter(letter=guess)
         print(padding)
     if hang_man.guesses == settings["guesses"]:
         print(s.pr_red("\nYou have reached the maximum number of guesses. "))
@@ -553,7 +557,7 @@ def begin(player_name: str) -> None:
         print(f"Your total points are {s.pr_bold(s = log['points'])}.\n")
         print(f"{padding}\n")
         input("Press enter to continue. ")
-        os.system('cls')
+        os.system("cls")
         begin(player_name)
     else:
         if log["points"] > 15:
@@ -564,7 +568,7 @@ def begin(player_name: str) -> None:
             print(f"You have {s.pr_red(s = 'lost')} the game. ")
         log["points"] += hang_man.calculate_points()
         log["player"] = (hang_man.player).capitalize()
-        end_game(log = log)
+        end_game(log=log)
 
 
 if __name__ == "__main__":
@@ -589,7 +593,7 @@ if __name__ == "__main__":
                 case 3:
                     search_player()
                 case 4:
-                    print('4')
+                    print("4")
                 case _:  # default
                     sys.exit()
             input("Press Enter to continue...")

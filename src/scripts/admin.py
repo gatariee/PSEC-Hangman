@@ -3,105 +3,15 @@ import json
 import os
 import hashlib
 import time as t
+import datetime
 from styles import Styles as s
 from getpass import getpass
-import datetime
+from print import admin_banner as banner
 
-
-def banner(num):
-    if num == 1:
-        os.system("cls")
-        print(s.pr_bold((f"{padding} ~ MENU ~ {padding}\n")))
-        print(
-            f"\t\tYou have selected: {s.pr_bold('Word Settings')}\n\n{s.pr_bold(padding * 2 + '==========')}\n"
-        )
-        print(f"\t\t\t{s.pr_bold('1')}: Add word")
-        t.sleep(0.05)
-        print(f"\t\t\t{s.pr_bold('2')}: Remove word")
-        t.sleep(0.05)
-        print(f"\t\t\t{s.pr_bold('3')}: Edit word")
-        t.sleep(0.05)
-        print(f"\t\t\t{s.pr_bold('4')}: View wordlist")
-        t.sleep(0.05)
-        print(f"\t\t\t{s.pr_bold('5')}: {s.pr_red('*** Reset Words ***')}")
-        t.sleep(0.05)
-        print(f"\t\t\t{s.pr_bold('6')}: Toggle Words")
-        t.sleep(0.05)
-        print(f"\t\t\t{s.pr_bold('7')}: Back")
-    elif num == 2:
-
-        print(
-            s.pr_green(
-                (
-                    r""" █████╗ ██████╗ ███╗   ███╗██╗███╗   ██╗    ██████╗  █████╗ ███╗   ██╗███████╗██╗     
-██╔══██╗██╔══██╗████╗ ████║██║████╗  ██║    ██╔══██╗██╔══██╗████╗  ██║██╔════╝██║     
-███████║██║  ██║██╔████╔██║██║██╔██╗ ██║    ██████╔╝███████║██╔██╗ ██║█████╗  ██║     
-██╔══██║██║  ██║██║╚██╔╝██║██║██║╚██╗██║    ██╔═══╝ ██╔══██║██║╚██╗██║██╔══╝  ██║     
-██║  ██║██████╔╝██║ ╚═╝ ██║██║██║ ╚████║    ██║     ██║  ██║██║ ╚████║███████╗███████╗
-╚═╝  ╚═╝╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝
-                                                                                      """
-                )
-            )
-        )
-    elif num == 3:
-        try:
-            with open("../data/game_settings.txt", "r") as f:
-                obj = ast.literal_eval(f.read())
-        except FileNotFoundError:
-            print("Error. Settings not found. ")
-        os.system("cls")
-        print(s.pr_bold((f"\n\n\n{padding} ~ MENU ~ {padding}\n")))
-        print(f"\tYou have selected: {s.pr_bold('Game Settings')}\n")
-        t.sleep(0.05)
-        print(f"\t\tNumber of sessions: {s.pr_bold(obj['number of attempts'])}")
-        t.sleep(0.05)
-        print(
-            f"\t\tNumber of guesses per session: {s.pr_bold(obj['number of guesses'])}"
-        )
-        t.sleep(0.05)
-        print(
-            f"\t\tNumber of top players on leaderboard: {s.pr_bold(obj['number of top players'])}\n\n{s.pr_bold(padding * 2 + '==========')}\n"
-        )
-        print(f" {s.pr_bold('1')}: Edit number of sessions")
-        t.sleep(0.05)
-        print(f" {s.pr_bold('2')}: Edit number of attempts/guesses")
-        t.sleep(0.05)
-        print(f" {s.pr_bold('3')}: Edit number of top players")
-        t.sleep(0.05)
-        print(f" {s.pr_bold('4')}: Back\n")
-    elif num == 4:
-        os.system("cls")
-        print(s.pr_bold((f"{padding} ~ MENU ~ {padding}\n")))
-        print(
-            f"\tYou have selected: {s.pr_bold('View Reports')}\n\n{s.pr_bold(padding * 2 + '==========')}\n"
-        )
-        print(f"\t\t{s.pr_bold('1')}: Print Leaderboard")
-        t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('2')}: Filter Log")
-        t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('3')}: Remove Log")
-        t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('4')}: Back")
-    elif num == 5:
-        os.system("cls")
-        print(s.pr_bold((f"{padding} ~ MENU ~ {padding}\n")))
-        print(
-            f"\tYou have selected: {s.pr_bold('Admin Settings')}\n\n{s.pr_bold(padding * 2 + '==========')}\n"
-        )
-        print(f"\t\t{s.pr_bold('1')}: Create Admin")
-        t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('2')}: Delete Admin")
-        t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('3')}: View Admins")
-        t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('4')}: Back")
-
-
-
-#######
+# General Functions
 def read_file(file):
     try:
-        if(os.stat(file).st_size == 0):
+        if os.stat(file).st_size == 0:
             print("File is empty. Please contact a system administrator")
             input("The program will now exit. Press enter to continue...")
             exit()
@@ -111,6 +21,8 @@ def read_file(file):
         print("Error. File not found. ")
         input("Press enter to continue. ")
         return None
+
+
 def write_file(file, data):
     try:
         with open(file, "w") as f:
@@ -122,28 +34,73 @@ def write_file(file, data):
         print("Error. File not found. ")
         return None
 
+
+def validate_input(userin, options):
+    if options == "int":
+        if not userin.isnumeric():
+            return False, s.pr_red("Invalid input. Please try again.")
+        else:
+            return True, ""
+    else:
+        if not userin.isnumeric():
+            return False, s.pr_red("Invalid input. Please try again.")
+        if int(userin) not in options:
+            return False, s.pr_red("Invalid input. Please try again.")
+        else:
+            return True, ""
+
+
+def check_login(username: str, password: str) -> bool:
+    admins = read_file("../data/admin.txt")
+    password = hashlib.sha256(password.encode()).hexdigest()
+    for admin in admins:
+        if admin["username"] == username and admin["password"] == password:
+            return True
+
+
+def login(attempts: int):
+    os.system("cls")
+    print("\n\n")
+    banner(6)
+    username = input(s.pr_bold("Username: "))
+    t.sleep(0.1)
+    password = getpass(s.pr_bold("Password: "))
+    if check_login(username, password):
+        print("Successfully logged in.")
+        return True, attempts
+    else:
+        if attempts:
+            print(f"Invalid credentials. You have {attempts} attempts left.")
+            input("Press enter to continue...")
+        attempts -= 1
+        return False, attempts
+
+
+################################################################
+###                   1. Word Settings                       ###
+################################################################
 def add_word() -> None:
     word = input('Enter Word ("0" to exit): ').lower()
     if word == "0":
         return
-    if(' ' in word):
-        word_type = 'Idioms-Proverbs'
-        if(len(word.split()) > 8):
-            diff = 'Complex'
+    if " " in word:
+        word_type = "Idioms-Proverbs"
+        if len(word.split()) > 8:
+            diff = "Complex"
         else:
-            diff = 'Simple'
+            diff = "Simple"
     else:
-        word_type = 'Word'
-        if(len(word) > 8):
-            diff = 'Complex'
+        word_type = "Word"
+        if len(word) > 8:
+            diff = "Complex"
         else:
-            diff = 'Simple'
+            diff = "Simple"
     new_word = {
         "word": word,
         "meaning": input("Enter meaning: ").lower(),
         "difficulty": diff,
         "type": word_type,
-        "enabled": 'on'
+        "enabled": "on",
     }
     if os.stat("../data/word_list.txt").st_size == 0:
         obj = []
@@ -157,21 +114,19 @@ def add_word() -> None:
                 return
         obj.append(new_word)
     new = json.dumps(obj, indent=4)
-    write_file('../data/word_list.txt', new)
-    os.system('cls')
-    print(
-        (f"Successfully added \"{s.pr_bold(new_word['word'])}\" to the word list.")
-    )
-    print(padding*2)
+    write_file("../data/word_list.txt", new)
+    os.system("cls")
+    print((f"Successfully added \"{s.pr_bold(new_word['word'])}\" to the word list."))
+    print(padding * 2)
     print(f"The following attributes have been automatically added to the word: \n")
     print(f"\tDifficulty: {s.pr_bold(new_word['difficulty'])}")
     print(f"\tType: {s.pr_bold(new_word['type'])}\n")
-    print(padding*2)
+    print(padding * 2)
     input("Press Enter to continue...")
 
 
 def remove_word() -> None:
-    obj = read_file('../data/word_list.txt')
+    obj = read_file("../data/word_list.txt")
     while 1:
         check, index = False, 0
         os.system("cls")
@@ -193,7 +148,7 @@ def remove_word() -> None:
                 input("Press enter to continue...")
                 obj.pop(i)
                 new = json.dumps(obj, indent=4)
-                write_file('../data/word_list.txt', new)
+                write_file("../data/word_list.txt", new)
                 return
         if word == "0":
             return
@@ -203,10 +158,10 @@ def remove_word() -> None:
 
 
 def edit_word() -> None:
-    obj = read_file('../data/word_list.txt')
+    obj = read_file("../data/word_list.txt")
     while 1:
         check, index = False, 0
-        os.system("cls") 
+        os.system("cls")
         print(padding * 2 + "\n")
         for i in range(len(obj)):
             print(f"\t\t{s.pr_bold(i+1)}: {obj[i]['word']}")
@@ -247,7 +202,7 @@ def edit_word() -> None:
                     f"These are the new values\n\tWord: {obj[i]['word']}\n\tType: {obj[i]['meaning']}\n\tDifficulty: {obj[i]['difficulty']}"
                 )
                 new = json.dumps(obj, indent=4)
-                write_file('../data/word_list.txt', new)
+                write_file("../data/word_list.txt", new)
                 return
         if word == "0":
             return
@@ -258,15 +213,15 @@ def edit_word() -> None:
 
 def view_words() -> None:
     try:
-        if(os.stat("../data/word_list.txt").st_size == 0):
+        if os.stat("../data/word_list.txt").st_size == 0:
             print("Wordist is empty.")
             input("Press Enter to continue...")
             return
-        obj = read_file('../data/word_list.txt')
+        obj = read_file("../data/word_list.txt")
         print(f"There are currently {len(obj)} words in the word list.\n")
         print(padding * 4 + "\n")
         for i in range(len(obj)):
-            if(obj[i]['enabled'] == 'on'):
+            if obj[i]["enabled"] == "on":
                 print(s.pr_green((f"\t{s.pr_bold(i+1)}: {obj[i]['word']}")))
             else:
                 print(s.pr_red((f"\t{s.pr_bold(i+1)}: {obj[i]['word']}")))
@@ -292,16 +247,18 @@ def reset_words() -> None:
             return
     else:
         return
+
+
 def status_menu() -> None:
     while 1:
         os.system("cls")
         # print list of words but only showing enabled and type
-        obj = read_file('../data/word_list.txt')
+        obj = read_file("../data/word_list.txt")
         print(padding * 4 + "\n")
         enabled_counter = 0
         disabled_counter = 0
         for i in range(len(obj)):
-            if(obj[i]['enabled'] == 'on'):
+            if obj[i]["enabled"] == "on":
                 enabled_counter += 1
                 print(s.pr_green((f"\t{s.pr_bold(i+1)}: {obj[i]['word']}")))
             else:
@@ -319,8 +276,8 @@ def status_menu() -> None:
         print(f"{s.pr_bold('4')}: Back")
         t.sleep(0.05)
         choice = input(">> ")
-        check, err = validate_input(choice, [1,2,3,4])
-        if(check):
+        check, err = validate_input(choice, [1, 2, 3, 4])
+        if check:
             choice = int(choice)
             match choice:
                 case 1:
@@ -337,9 +294,50 @@ def status_menu() -> None:
         else:
             print(err)
             input("Press Enter to continue...")
-#######
+
+
+def toggle_words():
+    obj = read_file("../data/word_list.txt")
+    for i in range(len(obj)):
+        if obj[i]["type"] == "Word":
+            if obj[i]["enabled"] == "on":
+                obj[i]["enabled"] = "off"
+            else:
+                obj[i]["enabled"] = "on"
+    new = json.dumps(obj, indent=4)
+    write_file("../data/word_list.txt", new)
+
+
+def toggle_idioms():
+    obj = read_file("../data/word_list.txt")
+    for i in range(len(obj)):
+        if obj[i]["type"] == "Idioms-Proverbs":
+            if obj[i]["enabled"] == "on":
+                obj[i]["enabled"] = "off"
+            else:
+                obj[i]["enabled"] = "on"
+    new = json.dumps(obj, indent=4)
+    write_file("../data/word_list.txt", new)
+
+
+def toggle_specific():
+    obj = read_file("../data/word_list.txt")
+    user_input = input("Enter index of word to toggle: ")
+    for i, word in enumerate(obj):
+        if i == int(user_input) - 1:
+            if word["enabled"] == "on":
+                word["enabled"] = "off"
+            else:
+                word["enabled"] = "on"
+    new = json.dumps(obj, indent=4)
+    write_file("../data/word_list.txt", new)
+
+
+###############################################################
+###                   2. Game Settings                      ###
+###############################################################
 def edit_session() -> None:
-    settings = read_file('../data/game_settings.txt')
+    settings = read_file("../data/game_settings.txt")
     while 1:
         os.system("cls")
         print(
@@ -350,7 +348,7 @@ def edit_session() -> None:
         if check:
             settings["number of attempts"] = int(session)
             new = json.dumps(settings, indent=4)
-            write_file('../data/game_settings.txt', new)
+            write_file("../data/game_settings.txt", new)
             print(s.pr_green("Successfully updated number of sessions."))
             input("Press Enter to continue...")
             break
@@ -360,7 +358,7 @@ def edit_session() -> None:
 
 
 def edit_guesses() -> None:
-    settings = read_file('../data/game_settings.txt')
+    settings = read_file("../data/game_settings.txt")
     while 1:
         os.system("cls")
         print(
@@ -371,7 +369,7 @@ def edit_guesses() -> None:
         if check:
             settings["number of guesses"] = int(guesses)
             new = json.dumps(settings, indent=4)
-            write_file('../data/game_settings.txt', new)
+            write_file("../data/game_settings.txt", new)
             print(s.pr_green("Successfully updated number of guesses."))
             input("Press Enter to continue...")
             break
@@ -381,7 +379,7 @@ def edit_guesses() -> None:
 
 
 def edit_top() -> None:
-    settings = read_file('../data/game_settings.txt')
+    settings = read_file("../data/game_settings.txt")
     while 1:
         os.system("cls")
         print(
@@ -392,7 +390,7 @@ def edit_top() -> None:
         if check:
             settings["number of top players"] = int(top)
             new = json.dumps(settings, indent=4)
-            write_file('../data/game_settings.txt', new)
+            write_file("../data/game_settings.txt", new)
             print(s.pr_green("Successfully updated number of top scores."))
             input("Press Enter to continue...")
             break
@@ -400,46 +398,13 @@ def edit_top() -> None:
             print(err)
             input("Press Enter to continue...")
 
-def toggle_words():
-    # only toggle type 'Word'
-    obj = read_file('../data/word_list.txt')
-    for i in range(len(obj)):
-        if obj[i]['type'] == 'Word':
-            if obj[i]['enabled'] == 'on':
-                obj[i]['enabled'] = 'off'
-            else:
-                obj[i]['enabled'] = 'on'
-    new = json.dumps(obj, indent=4)
-    write_file("../data/word_list.txt", new)
 
-def toggle_idioms():
-    # only toggle type 'Idiom'
-    obj = read_file('../data/word_list.txt')
-    for i in range(len(obj)):
-        if obj[i]['type'] == 'Idioms-Proverbs':
-            if obj[i]['enabled'] == 'on':
-                obj[i]['enabled'] = 'off'
-            else:
-                obj[i]['enabled'] = 'on'
-    new = json.dumps(obj, indent=4)
-    write_file("../data/word_list.txt", new)
-
-def toggle_specific():
-    obj = read_file('../data/word_list.txt')
-    user_input = input("Enter index of word to toggle: ")
-    for i, word in enumerate(obj):
-        if i == int(user_input) - 1:
-            if word['enabled'] == 'on':
-                word['enabled'] = 'off'
-            else:
-                word['enabled'] = 'on'
-    new = json.dumps(obj, indent=4)
-    write_file("../data/word_list.txt", new)
-    
-#######
+###############################################################
+###                   3. View Reports                       ###
+###############################################################
 def print_top() -> None:
     os.system("cls")
-    logs = read_file('../data/game_logs.txt')
+    logs = read_file("../data/game_logs.txt")
     logs.sort(key=lambda x: x["points"], reverse=True)
     print(f"{padding*3}")
     print(f"\t{s.pr_bold('Rank')}\t\t{s.pr_bold('Name')}\t\t{s.pr_bold('Points')}")
@@ -471,7 +436,7 @@ def search_logs():
 
 
 def search_name():
-    logs = read_file('../data/game_logs.txt')
+    logs = read_file("../data/game_logs.txt")
     name = input("Enter name: ")
     for log in logs:
         if log["player"].lower() == name.lower():
@@ -502,7 +467,7 @@ def search_date():
         os.system("cls")
         start_date_ugly = datetime.datetime.strptime(start_date, "%d/%m/%y")
         end_date_ugly = datetime.datetime.strptime(end_date, "%d/%m/%y")
-        logs = read_file('../data/game_logs.txt')
+        logs = read_file("../data/game_logs.txt")
         if logs is None:
             return
         for player in logs:
@@ -529,8 +494,9 @@ def search_date():
         print("Error. Invalid date format. ")
         input("Press Enter to continue...")
 
+
 def remove_log() -> None:
-    logs = read_file('../data/game_logs.txt')
+    logs = read_file("../data/game_logs.txt")
     print(f"{padding*2}\n")
     print(f"List of players:")
     print(f"{padding*2}\n")
@@ -550,16 +516,17 @@ def remove_log() -> None:
         input("Press Enter to continue...")
 
 
-
-#######
+###############################################################
+###                   4. Admin Settings                     ###
+###############################################################
 def add_admin():
     username = input("Enter username: ")
     password = input("Enter password: ")
     ##
-    numbers = '1234567890'
-    sp_chars = '!@#$%'
-    uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    lowercase = 'abcdefghijklmnopqrstuvwxyz'
+    numbers = "1234567890"
+    sp_chars = "!@#$%"
+    uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    lowercase = "abcdefghijklmnopqrstuvwxyz"
     num_string = f"Contains at least one number {s.pr_red('✘')}"
     sp_string = f"Contains at least one special character {s.pr_red('✘')}"
     len_string = f"Contains between 4 and 20 characters {s.pr_red('✘')}"
@@ -587,12 +554,24 @@ def add_admin():
         if i in lowercase:
             check_lowercase = True
             lower_string = f"Contains at least one lowercase letter {s.pr_green('✔')}"
-    if not(checknum and check_sp and check_len and check_uppercase and check_lowercase):
-        os.system('cls')
+    if not (
+        checknum and check_sp and check_len and check_uppercase and check_lowercase
+    ):
+        os.system("cls")
         print("Password does not meet requirements.")
-        print(padding*3)
-        print(len_string + "\n" + num_string + "\n" + sp_string + "\n" + upper_string + "\n" + lower_string)
-        print(padding*3)
+        print(padding * 3)
+        print(
+            len_string
+            + "\n"
+            + num_string
+            + "\n"
+            + sp_string
+            + "\n"
+            + upper_string
+            + "\n"
+            + lower_string
+        )
+        print(padding * 3)
         input("Press Enter to continue...")
         return
 
@@ -600,7 +579,7 @@ def add_admin():
         print("Error. Username or password cannot be empty.")
         input("Press Enter to continue...")
         return
-    admins = read_file('../data/admin.txt')
+    admins = read_file("../data/admin.txt")
     for admin in admins:
         if admin["username"] == username:
             print("Error. Username already exists.")
@@ -610,27 +589,29 @@ def add_admin():
     admins.append({"username": username, "password": password})
     new = json.dumps(admins, indent=4)
     write_file("../data/admin.txt", new)
-    os.system('cls')
+    os.system("cls")
     print(s.pr_green(f"Successfully added '{username}' as admin."))
     input("Press Enter to continue...")
 
+
 def remove_admin():
     username = input("Enter username: ")
-    admins = read_file('../data/admin.txt')
+    admins = read_file("../data/admin.txt")
     for admin in admins:
         if admin["username"] == username:
             admins.remove(admin)
             new = json.dumps(admins, indent=4)
             write_file("../data/admin.txt", new)
-            os.system('cls')
+            os.system("cls")
             print(s.pr_green(f"Successfully removed '{username}' as admin."))
             input("Press Enter to continue...")
             return
     print("Error. Username not found.")
     input("Press Enter to continue...")
 
+
 def view_admins():
-    admins = read_file('../data/admin.txt')
+    admins = read_file("../data/admin.txt")
     if len(admins) == 0:
         print("No admins found.")
         input("Press Enter to continue...")
@@ -645,22 +626,9 @@ def view_admins():
         input("Press Enter to continue...")
 
 
-
-def validate_input(userin, options):
-    if options == "int":
-        if not userin.isnumeric():
-            return False, s.pr_red("Invalid input. Please try again.")
-        else:
-            return True, ""
-    else:
-        if not userin.isnumeric():
-            return False, s.pr_red("Invalid input. Please try again.")
-        if int(userin) not in options:
-            return False, s.pr_red("Invalid input. Please try again.")
-        else:
-            return True, ""
-
-
+###############################################################
+###                          MENU                           ###
+###############################################################
 def menu() -> int:
     while 1:
         os.system("cls")
@@ -686,52 +654,6 @@ def menu() -> int:
         else:
             print(err)
             input("Press Enter to continue...")
-
-
-def check_login(username: str, password: str) -> bool:
-    admins = read_file('../data/admin.txt')
-    password = hashlib.sha256(password.encode()).hexdigest()
-    for admin in admins:
-        if admin["username"] == username and admin["password"] == password:
-            return True
-
-
-def login(attempts: int):
-    print(s.pr_bold((f"{padding} ~ LOGIN ~ {padding}")))
-    username = input(s.pr_bold("Username: "))
-    password = getpass(s.pr_bold("Password: "))
-    if check_login(username, password):
-        print("Successfully logged in.")
-        return True, attempts
-    else:
-        if attempts:
-            print(f"Invalid credentials. You have {attempts} attempts left.")
-        attempts -= 1
-        return False, attempts
-
-
-def game_menu():
-    while 1:
-        banner(3)
-        choice = input(">> ")
-        check, err = validate_input(choice, [1, 2, 3, 4])
-        if not check:
-            print(err)
-            input("Press Enter to continue...")
-        else:
-            choice = int(choice)
-            match choice:
-                case 1:
-                    edit_session()
-                case 2:
-                    edit_guesses()
-                case 3:
-                    edit_top()
-                case 4:
-                    return
-                case _:
-                    print("Invalid input. Please try again.")
-                    input("Press Enter to continue...")
 
 
 def word_menu():
@@ -764,6 +686,30 @@ def word_menu():
                     input("Press Enter to continue...")
 
 
+def game_menu():
+    while 1:
+        banner(3)
+        choice = input(">> ")
+        check, err = validate_input(choice, [1, 2, 3, 4])
+        if not check:
+            print(err)
+            input("Press Enter to continue...")
+        else:
+            choice = int(choice)
+            match choice:
+                case 1:
+                    edit_session()
+                case 2:
+                    edit_guesses()
+                case 3:
+                    edit_top()
+                case 4:
+                    return
+                case _:
+                    print("Invalid input. Please try again.")
+                    input("Press Enter to continue...")
+
+
 def reports_menu():
     while 1:
         banner(4)
@@ -783,9 +729,11 @@ def reports_menu():
                     remove_log()
                 case 4:
                     return
-                case _:      
+                case _:
                     print("Invalid input. Please try again.")
                     input("Press Enter to continue...")
+
+
 def admin_menu():
     while 1:
         banner(5)
@@ -809,6 +757,10 @@ def admin_menu():
                     print("Invalid input. Please try again.")
                     input("Press Enter to continue...")
 
+
+###############################################################
+###                          MAIN                           ###
+###############################################################
 def main() -> None:
     attempts = 3
     while attempts >= 0:
@@ -835,7 +787,6 @@ def main() -> None:
             case _:
                 print(s.pr_red(("Invalid input. Please try again.")))
                 input("Press Enter to continue...")
-
 
 
 if __name__ == "__main__":
