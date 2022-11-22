@@ -100,24 +100,27 @@ def banner(num):
 
 #######
 def read_file(file):
-    with open(file, "r") as f:
-        return ast.literal_eval(f.read())
+    try:
+        if(os.stat(file).st_size == 0):
+            print("File is empty. Please contact a system administrator")
+            input("The program will now exit. Press enter to continue...")
+            exit()
+        with open(file, "r") as f:
+            return ast.literal_eval(f.read())
+    except FileNotFoundError:
+        print("Error. File not found. ")
+        input("Press enter to continue. ")
+        return None
 def write_file(file, data):
-    with open(file, "w") as f:
-        f.seek(0)
-        f.truncate(0)
-        f.write(str(data))
-        f.close()
-
-# def read_words():
-#     with open('../data/word_list.txt', "r") as f:
-#         return ast.literal_eval(f.read())
-# def write_words(words):
-#     with open('../data/word_list.txt', "w") as f:
-#         f.seek(0)
-#         f.truncate(0)
-#         f.write(str(words))
-#         f.close()
+    try:
+        with open(file, "w") as f:
+            f.seek(0)
+            f.truncate(0)
+            f.write(str(data))
+            f.close()
+    except FileNotFoundError:
+        print("Error. File not found. ")
+        return None
 
 def add_word() -> None:
     word = input('Enter Word ("0" to exit): ').lower()
@@ -142,30 +145,29 @@ def add_word() -> None:
         "type": word_type,
         "enabled": 'on'
     }
-    with open("../data/word_list.txt", "r+") as f:
-        if os.stat("../data/word_list.txt").st_size == 0:
-            obj = []
-            obj.append(new_word)
-        else:
-            obj = ast.literal_eval(f.read())
-            for i in range(len(obj)):
-                if obj[i]["word"] == word:
-                    print(padding)
-                    print("Word already exists!")
-                    return
-            obj.append(new_word)
-        new = json.dumps(obj, indent=4)
-        write_file('../data/word_list.txt', new)
-        os.system('cls')
-        print(
-            (f"Successfully added \"{s.pr_bold(new_word['word'])}\" to the word list.")
-        )
-        print(padding*2)
-        print(f"The following attributes have been automatically added to the word: \n")
-        print(f"\tDifficulty: {s.pr_bold(new_word['difficulty'])}")
-        print(f"\tType: {s.pr_bold(new_word['type'])}\n")
-        print(padding*2)
-        input("Press Enter to continue...")
+    if os.stat("../data/word_list.txt").st_size == 0:
+        obj = []
+        obj.append(new_word)
+    else:
+        obj = read_file("../data/word_list.txt")
+        for i in range(len(obj)):
+            if obj[i]["word"] == word:
+                print(padding)
+                print("Word already exists!")
+                return
+        obj.append(new_word)
+    new = json.dumps(obj, indent=4)
+    write_file('../data/word_list.txt', new)
+    os.system('cls')
+    print(
+        (f"Successfully added \"{s.pr_bold(new_word['word'])}\" to the word list.")
+    )
+    print(padding*2)
+    print(f"The following attributes have been automatically added to the word: \n")
+    print(f"\tDifficulty: {s.pr_bold(new_word['difficulty'])}")
+    print(f"\tType: {s.pr_bold(new_word['type'])}\n")
+    print(padding*2)
+    input("Press Enter to continue...")
 
 
 def remove_word() -> None:
@@ -336,31 +338,8 @@ def status_menu() -> None:
             print(err)
             input("Press Enter to continue...")
 #######
-def read_settings() -> dict:
-    try:
-        with open("../data/game_settings.txt", "r") as f:
-            obj = ast.literal_eval(f.read())
-            return obj
-    except FileNotFoundError:
-        print("Error. Settings not found. ")
-
-
-def write_settings(obj) -> None:
-    try:
-        with open("../data/game_settings.txt", "w") as f:
-            new = json.dumps(obj, indent=4)
-            f.seek(0)
-            f.truncate(0)
-            f.write(str(new))
-            f.close()
-            return
-    except FileNotFoundError:
-        print("Error. Settings not found. ")
-        return
-
-
 def edit_session() -> None:
-    settings = read_settings()
+    settings = read_file('../data/game_settings.txt')
     while 1:
         os.system("cls")
         print(
@@ -370,7 +349,8 @@ def edit_session() -> None:
         check, err = validate_input(session, "int")
         if check:
             settings["number of attempts"] = int(session)
-            write_settings(settings)
+            new = json.dumps(settings, indent=4)
+            write_file('../data/game_settings.txt', new)
             print(s.pr_green("Successfully updated number of sessions."))
             input("Press Enter to continue...")
             break
@@ -380,7 +360,7 @@ def edit_session() -> None:
 
 
 def edit_guesses() -> None:
-    settings = read_settings()
+    settings = read_file('../data/game_settings.txt')
     while 1:
         os.system("cls")
         print(
@@ -390,7 +370,8 @@ def edit_guesses() -> None:
         check, err = validate_input(guesses, "int")
         if check:
             settings["number of guesses"] = int(guesses)
-            write_settings(settings)
+            new = json.dumps(settings, indent=4)
+            write_file('../data/game_settings.txt', new)
             print(s.pr_green("Successfully updated number of guesses."))
             input("Press Enter to continue...")
             break
@@ -400,7 +381,7 @@ def edit_guesses() -> None:
 
 
 def edit_top() -> None:
-    settings = read_settings()
+    settings = read_file('../data/game_settings.txt')
     while 1:
         os.system("cls")
         print(
@@ -410,7 +391,8 @@ def edit_top() -> None:
         check, err = validate_input(top, "int")
         if check:
             settings["number of top players"] = int(top)
-            write_settings(settings)
+            new = json.dumps(settings, indent=4)
+            write_file('../data/game_settings.txt', new)
             print(s.pr_green("Successfully updated number of top scores."))
             input("Press Enter to continue...")
             break
@@ -457,57 +439,39 @@ def toggle_specific():
 #######
 def print_top() -> None:
     os.system("cls")
-    logs = read_logs()
-    if len(logs) == 0:
-        print("No logs found.")
-        input("Press Enter to continue...")
-    else:
-        logs.sort(key=lambda x: x["points"], reverse=True)
-        print(f"{padding*3}")
-        print(f"\t{s.pr_bold('Rank')}\t\t{s.pr_bold('Name')}\t\t{s.pr_bold('Points')}")
-        print(f"{padding*3}")
-        for i, log in enumerate(logs, start=1):
-            print(f"\t{s.pr_bold(i)}\t\t{log['player']}\t\t{log['points']}")
-        print(f"\n{padding * 3}\n")
-        input("Press Enter to continue...")
-
-
-def read_logs() -> dict:
-    try:
-        with open("../data/game_logs.txt", "r") as f:
-            obj = ast.literal_eval(f.read())
-            return obj
-    except FileNotFoundError:
-        print("Error. Leaderboard not found. ")
+    logs = read_file('../data/game_logs.txt')
+    logs.sort(key=lambda x: x["points"], reverse=True)
+    print(f"{padding*3}")
+    print(f"\t{s.pr_bold('Rank')}\t\t{s.pr_bold('Name')}\t\t{s.pr_bold('Points')}")
+    print(f"{padding*3}")
+    for i, log in enumerate(logs, start=1):
+        print(f"\t{s.pr_bold(i)}\t\t{log['player']}\t\t{log['points']}")
+    print(f"\n{padding * 3}\n")
+    input("Press Enter to continue...")
 
 
 def search_logs():
-    logs = read_logs()
-    if len(logs) == 0:
-        print("No logs found.")
-        input("Press Enter to continue...")
-    else:
-        while 1:
-            os.system("cls")
-            print(f"{padding*2}\n")
-            print(f"\t{s.pr_bold('1')}: Search by name")
-            print(f"\t{s.pr_bold('2')}: Search by date")
-            print(f"\t{s.pr_bold('3')}: Back")
-            print(f"\n{padding*2}\n")
-            choice = input(">> ")
-            if choice == "1":
-                search_name()
-            elif choice == "2":
-                search_date()
-            elif choice == "3":
-                break
-            else:
-                print(s.pr_red("Invalid input. Please try again."))
-                input("Press Enter to continue...")
+    while 1:
+        os.system("cls")
+        print(f"{padding*2}\n")
+        print(f"\t{s.pr_bold('1')}: Search by name")
+        print(f"\t{s.pr_bold('2')}: Search by date")
+        print(f"\t{s.pr_bold('3')}: Back")
+        print(f"\n{padding*2}\n")
+        choice = input(">> ")
+        if choice == "1":
+            search_name()
+        elif choice == "2":
+            search_date()
+        elif choice == "3":
+            break
+        else:
+            print(s.pr_red("Invalid input. Please try again."))
+            input("Press Enter to continue...")
 
 
 def search_name():
-    logs = read_logs()
+    logs = read_file('../data/game_logs.txt')
     name = input("Enter name: ")
     for log in logs:
         if log["player"].lower() == name.lower():
@@ -538,7 +502,7 @@ def search_date():
         os.system("cls")
         start_date_ugly = datetime.datetime.strptime(start_date, "%d/%m/%y")
         end_date_ugly = datetime.datetime.strptime(end_date, "%d/%m/%y")
-        logs = read_logs()
+        logs = read_file('../data/game_logs.txt')
         if logs is None:
             return
         for player in logs:
@@ -565,21 +529,8 @@ def search_date():
         print("Error. Invalid date format. ")
         input("Press Enter to continue...")
 
-def write_logs(obj) -> None:
-    try:
-        with open("../data/game_logs.txt", "w") as f:
-            new = json.dumps(obj, indent=4)
-            f.seek(0)
-            f.truncate(0)
-            f.write(str(new))
-            f.close()
-            return
-    except FileNotFoundError:
-        print("Error. Logs not found. ")
-        return
-
 def remove_log() -> None:
-    logs = read_logs()  
+    logs = read_file('../data/game_logs.txt')
     print(f"{padding*2}\n")
     print(f"List of players:")
     print(f"{padding*2}\n")
@@ -590,7 +541,8 @@ def remove_log() -> None:
     try:
         player_name = logs[int(name) - 1]["player"]
         logs.pop(int(name) - 1)
-        write_logs(logs)
+        new = json.dumps(logs, indent=4)
+        write_file("../data/game_logs.txt", new)
         print(f"Successfully removed {s.pr_bold(player_name)}.")
         input("Press Enter to continue...")
     except IndexError:
@@ -600,31 +552,6 @@ def remove_log() -> None:
 
 
 #######
-def read_admins():
-    try:
-        with open("../data/admin.txt", "r") as f:
-            obj = ast.literal_eval(f.read())
-            return obj
-    except FileNotFoundError:
-        print("Error. Admins not found. ")
-        input("Press Enter to continue...")
-        return
-
-
-def write_admins(obj) -> None:
-    try:
-        with open("../data/admin.txt", "w") as f:
-            new = json.dumps(obj, indent=4)
-            f.seek(0)
-            f.truncate(0)
-            f.write(str(new))
-            f.close()
-            return
-    except FileNotFoundError:
-        print("Error. Admin.txt not found. ")
-        return
-
-
 def add_admin():
     username = input("Enter username: ")
     password = input("Enter password: ")
@@ -673,7 +600,7 @@ def add_admin():
         print("Error. Username or password cannot be empty.")
         input("Press Enter to continue...")
         return
-    admins = read_admins()
+    admins = read_file('../data/admin.txt')
     for admin in admins:
         if admin["username"] == username:
             print("Error. Username already exists.")
@@ -681,18 +608,20 @@ def add_admin():
             return
     password = hashlib.sha256(password.encode()).hexdigest()
     admins.append({"username": username, "password": password})
-    write_admins(admins)
+    new = json.dumps(admins, indent=4)
+    write_file("../data/admin.txt", new)
     os.system('cls')
     print(s.pr_green(f"Successfully added '{username}' as admin."))
     input("Press Enter to continue...")
 
 def remove_admin():
     username = input("Enter username: ")
-    admins = read_admins()
+    admins = read_file('../data/admin.txt')
     for admin in admins:
         if admin["username"] == username:
             admins.remove(admin)
-            write_admins(admins)
+            new = json.dumps(admins, indent=4)
+            write_file("../data/admin.txt", new)
             os.system('cls')
             print(s.pr_green(f"Successfully removed '{username}' as admin."))
             input("Press Enter to continue...")
@@ -701,7 +630,7 @@ def remove_admin():
     input("Press Enter to continue...")
 
 def view_admins():
-    admins = read_admins()
+    admins = read_file('../data/admin.txt')
     if len(admins) == 0:
         print("No admins found.")
         input("Press Enter to continue...")
@@ -760,17 +689,11 @@ def menu() -> int:
 
 
 def check_login(username: str, password: str) -> bool:
-    try:
-        with open("../data/admin.txt", "r") as f:
-            obj = ast.literal_eval(f.read())
-    except Exception as e:
-        print(e)
-        return False
-    for i in range(len(obj)):
-        if obj[i]["username"] == username:
-            if (obj[i]["password"]) == hashlib.sha256(password.encode()).hexdigest():
-                return True
-    return False
+    admins = read_file('../data/admin.txt')
+    password = hashlib.sha256(password.encode()).hexdigest()
+    for admin in admins:
+        if admin["username"] == username and admin["password"] == password:
+            return True
 
 
 def login(attempts: int):
