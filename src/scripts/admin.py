@@ -99,15 +99,25 @@ def banner(num):
 
 
 #######
-def read_words():
-    with open('../data/word_list.txt', "r") as f:
+def read_file(file):
+    with open(file, "r") as f:
         return ast.literal_eval(f.read())
-def write_words(words):
-    with open('../data/word_list.txt', "w") as f:
+def write_file(file, data):
+    with open(file, "w") as f:
         f.seek(0)
         f.truncate(0)
-        f.write(str(words))
+        f.write(str(data))
         f.close()
+
+# def read_words():
+#     with open('../data/word_list.txt', "r") as f:
+#         return ast.literal_eval(f.read())
+# def write_words(words):
+#     with open('../data/word_list.txt', "w") as f:
+#         f.seek(0)
+#         f.truncate(0)
+#         f.write(str(words))
+#         f.close()
 
 def add_word() -> None:
     word = input('Enter Word ("0" to exit): ').lower()
@@ -145,7 +155,7 @@ def add_word() -> None:
                     return
             obj.append(new_word)
         new = json.dumps(obj, indent=4)
-        write_words(new)
+        write_file('../data/word_list.txt', new)
         os.system('cls')
         print(
             (f"Successfully added \"{s.pr_bold(new_word['word'])}\" to the word list.")
@@ -159,7 +169,7 @@ def add_word() -> None:
 
 
 def remove_word() -> None:
-    obj = read_words()
+    obj = read_file('../data/word_list.txt')
     while 1:
         check, index = False, 0
         os.system("cls")
@@ -181,7 +191,7 @@ def remove_word() -> None:
                 input("Press enter to continue...")
                 obj.pop(i)
                 new = json.dumps(obj, indent=4)
-                write_words(new)
+                write_file('../data/word_list.txt', new)
                 return
         if word == "0":
             return
@@ -191,7 +201,7 @@ def remove_word() -> None:
 
 
 def edit_word() -> None:
-    obj = read_words()
+    obj = read_file('../data/word_list.txt')
     while 1:
         check, index = False, 0
         os.system("cls") 
@@ -235,7 +245,7 @@ def edit_word() -> None:
                     f"These are the new values\n\tWord: {obj[i]['word']}\n\tType: {obj[i]['meaning']}\n\tDifficulty: {obj[i]['difficulty']}"
                 )
                 new = json.dumps(obj, indent=4)
-                write_words(new)
+                write_file('../data/word_list.txt', new)
                 return
         if word == "0":
             return
@@ -250,7 +260,7 @@ def view_words() -> None:
             print("Wordist is empty.")
             input("Press Enter to continue...")
             return
-        obj = read_words()
+        obj = read_file('../data/word_list.txt')
         print(f"There are currently {len(obj)} words in the word list.\n")
         print(padding * 4 + "\n")
         for i in range(len(obj)):
@@ -284,7 +294,7 @@ def status_menu() -> None:
     while 1:
         os.system("cls")
         # print list of words but only showing enabled and type
-        obj = read_words()
+        obj = read_file('../data/word_list.txt')
         print(padding * 4 + "\n")
         enabled_counter = 0
         disabled_counter = 0
@@ -410,7 +420,7 @@ def edit_top() -> None:
 
 def toggle_words():
     # only toggle type 'Word'
-    obj = read_words()
+    obj = read_file('../data/word_list.txt')
     for i in range(len(obj)):
         if obj[i]['type'] == 'Word':
             if obj[i]['enabled'] == 'on':
@@ -418,11 +428,11 @@ def toggle_words():
             else:
                 obj[i]['enabled'] = 'on'
     new = json.dumps(obj, indent=4)
-    write_words(new)
+    write_file("../data/word_list.txt", new)
 
 def toggle_idioms():
     # only toggle type 'Idiom'
-    obj = read_words()
+    obj = read_file('../data/word_list.txt')
     for i in range(len(obj)):
         if obj[i]['type'] == 'Idioms-Proverbs':
             if obj[i]['enabled'] == 'on':
@@ -430,10 +440,10 @@ def toggle_idioms():
             else:
                 obj[i]['enabled'] = 'on'
     new = json.dumps(obj, indent=4)
-    write_words(new)
+    write_file("../data/word_list.txt", new)
 
 def toggle_specific():
-    obj = read_words()
+    obj = read_file('../data/word_list.txt')
     user_input = input("Enter index of word to toggle: ")
     for i, word in enumerate(obj):
         if i == int(user_input) - 1:
@@ -442,7 +452,7 @@ def toggle_specific():
             else:
                 word['enabled'] = 'on'
     new = json.dumps(obj, indent=4)
-    write_words(new)
+    write_file("../data/word_list.txt", new)
     
 #######
 def print_top() -> None:
