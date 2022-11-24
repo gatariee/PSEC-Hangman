@@ -4,8 +4,7 @@ from styles import Styles as s
 import ast
 
 padding = "=" * 25
-
-
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 def admin_banner(num):
     if num == 1:
         os.system("cls")

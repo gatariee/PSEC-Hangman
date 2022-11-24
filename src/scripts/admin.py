@@ -762,6 +762,9 @@ def admin_menu():
 ###                          MAIN                           ###
 ###############################################################
 def main() -> None:
+
+    # Change directory to the directory of the script
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     attempts = 3
     while attempts >= 0:
         check, attempts = login(attempts)

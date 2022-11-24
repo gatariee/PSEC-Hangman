@@ -6,8 +6,7 @@ import sys
 import time as t
 from datetime import date
 from styles import Styles as s
-
-
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 class Game:
     """
     A class to represent a Player and their game status.
@@ -107,6 +106,7 @@ class Game:
             print(padding)
             print(s.pr_red("You have already guessed that letter."))
             return
+
         count = 0
         if letter.lower() in self.word:
             for i in range(len(self.word)):
@@ -235,9 +235,7 @@ def menu() -> int:
         t.sleep(0.05)
         print(s.pr_bold(f"                        3. Search player\n"))
         t.sleep(0.05)
-        print(s.pr_bold(f"                        4. Game Settings\n"))
-        t.sleep(0.05)
-        print(s.pr_bold(f"                        5. Exit\n"))
+        print(s.pr_bold(f"                        4. Exit\n"))
         user_input = input(">> ")
         check, err = validate_input(user_input=user_input, choice=2)
         if check:
@@ -417,8 +415,42 @@ def validate_input(user_input, choice: int) -> tuple:
             elif user_input == "N" or user_input == "n":
                 print(s.pr_green("Thanks for playing! "))
                 exit()
+    elif choice == 4:
+        options = ['1','2','3']
+        if user_input not in options:
+            return False, s.pr_red("Please enter a valid option. ")
+        else:
+            return True, None
 
 
+
+def find_vowels(word: str):
+    """
+    This function finds the vowels in the word and returns a list of vowels.
+
+    Arguments:
+        word {str}: This is the word the player has to guess.
+
+    Returns:
+        list: This is a list of vowels in the word.
+    """
+    vowels = ["a", "e", "i", "o", "u"]
+    vowel_list = []
+    for char in word:
+        if char in vowels:
+            vowel_list.append(char)
+    return vowel_list
+def solve_vowels(game, vowels):
+    vowels_unique = []
+    for vowel in vowels:
+        if vowel not in vowels_unique:
+            vowels_unique.append(vowel)
+    for i in range(len(game.word)):
+        for vowel in vowels_unique:
+            if game.word[i] == vowel:
+                before = game.guess_progress[: i * 2]
+                after = game.guess_progress[i * 2 + 1 :]
+                game.guess_progress = before + vowel + after
 def print_leaderboard(num: int) -> None:
     """
     _summary_
@@ -527,6 +559,8 @@ def begin(player_name: str) -> None:
         player_name (str): this is the player's name
     """
     global session
+    global lifeline_vowel
+    global lifeline_meaning
     hang_man = Game(player_name)
     if session == 1:
         banner(game=hang_man, session=session, choice=1)
@@ -535,8 +569,52 @@ def begin(player_name: str) -> None:
     ):
         hang_man.calculate_points()
         banner(game=hang_man, session=session, choice=3)
-        guess = input("Guess: ")
-        hang_man.guess_letter(letter=guess)
+        guess = input("Guess ('0' to activate lifeline): ")
+        if(guess == "0"):
+            os.system('cls')
+            print(f"{padding}\nLifelines: \n1. Show Vowels\n2. Show Meaning\n3. Quit\n{padding}")
+            while(1):
+                lifeline = input("Enter lifeline: ")
+                check, err = validate_input(user_input=lifeline, choice=4)
+                if check:
+                    break
+                else:
+                    print(err)
+            if int(lifeline) == 1:
+                if lifeline_vowel == True:
+                    os.system('cls')
+                    print(s.pr_red("You have already used this lifeline. "))
+                    continue
+                os.system('cls')
+                vowels = find_vowels(hang_man.word)
+                if(len(vowels) == 0):
+                    print(s.pr_red("No vowels found. "))
+                else:
+                    vowel_obj = {
+                        "a" : 0,
+                        "e" : 0,
+                        "i" : 0,
+                        "o" : 0,
+                        "u" : 0
+                    }
+                    for vowel in vowels:
+                        vowel_obj[vowel] += 1
+                    print(f"{padding}\nVowels: ")
+                    for vowel in vowel_obj:
+                        if vowel_obj[vowel] != 0:
+                            print(f"{vowel} - {vowel_obj[vowel]}")
+                    input("Press enter to continue. ")
+                    solve_vowels(hang_man, vowels)
+                    lifeline_vowel = True
+                    os.system('cls')
+            elif int(lifeline) == 2:
+                print('2')
+                input("Press enter to continue. ")
+            elif int(lifeline) == 3:
+                print('3')
+                input("Press enter to continue. ")
+        else:
+            hang_man.guess_letter(letter=guess)
         print(padding)
     if hang_man.guesses == settings["guesses"]:
         print(s.pr_red("\nYou have reached the maximum number of guesses. "))
@@ -580,6 +658,8 @@ if __name__ == "__main__":
             choice = menu()
             match choice:
                 case 1:
+                    lifeline_vowel = False
+                    lifeline_meaning = False
                     session = 1
                     previous_words = []
                     log = {
@@ -593,9 +673,7 @@ if __name__ == "__main__":
                 case 3:
                     search_player()
                 case 4:
-                    print("4")
-                case _:  # default
-                    sys.exit()
+                    exit()
             input("Press Enter to continue...")
     except KeyboardInterrupt:
         print(s.pr_red(("\nThank you for playing. ")))
