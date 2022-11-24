@@ -1,41 +1,91 @@
-# CA1 Assignment for Programming in Security 2022 
 
-### These are the rules of the game:
+# PSEC-Hangman
 
-- 5 guesses
-- 3 games
-- every word is 5 letters long
-- 2 points are awarded for each letter
-- maximum of 30 points (5* 2 * 3)
-- player wins if score is > 15 points
-### File Navigation
-- hangman.py
+Project for PSEC CA1 2022
+
+
+
+## Navigation
+
 - admin.py
-- word_list.txt
-- game_settings.txt
-- game_log.txt
-
-### Usage
-- admin.py
-    - requires admin login to access 
-    - administrative script, able to add/edit/delete words from wordlist
-    - define settings for the game (e.g add/rempve/delete parameters)
-    - print game report(e.g points, player)
+    - administrative panel, requires login credentials for access
+        - setup, add, remove, edit words and meanings in word_list.txt
+        - define settings for the game, includes adding, remove and editing of various game perimeters
+        - print report for games played
 - hangman.py
-    - main game application
-    - print top 5 players from leaderboard
-- word_list
-    - list/dictionary that must contain at least 20 words
-    - basic requirements: 5 letters
-    - short explanation on word
-- game_settings
-    - number of attempts: 3
-    - number of words: 3
-    - number of top players: 4
-- game_log
-    - specification on date required
-    - game report that contains playername and score
+    - game client, does not require credentials; for public-use
+        - play hangman
+        - print leaderboard
+- data files
+    - word_list.txt
+        - contains the wordlist for the game
+            ```
+            {
+                word: 'word',
+                meaning: 'meaning',
+                difficulty: 'simple/complex',
+                type: 'word/idiom-proverbs',
+                enabled: 'on/off'
+            }
+    - game_settings.txt
+        - contains the settings for the game 
+            ```
+            {
+                "number of guesses": x: int,
+                "number of attempts": x: int,
+                "number of words": x: int,
+                "number of top players": x: int
+            }
+    - game_logs.txt
+        - contains the report/logs of every game played
+            ```
+            {
+                "player": "name",
+                "points": x: int,
+                "date": "dd/mm/yy"
+            }
+            ```
+    - admin.txt
+        - contains the login credentials for admin users
+            ```
+            {
+                "username": username,
+                "password": hash
+            }
+            ```
+## Documentation
 
+- [Admin](https://tbd)
+    - User-guide for administrative purposes:
+        - instructions on how to definition of game files
+        - navigation guide of input-output files
+        - instructions to how to properly run the script
+        - troubleshooting 
+- [Player](https://tbd)
+    - User-guide for players to run the script:
+        - how to correctly run the script 
+        - general IT support 
+        - troubleshooting to a reasonable extent
+- [System](https://tbd)
+    - User-guide for system administrators for long-term support:
+        - application overview
+            - illustrations of data flow
+            - description of main functions for each script
 
 ## Installation
-- tbd
+
+To deploy this project run
+
+```bash
+  git clone https://github.com/gatariee/PSEC-Hangman
+
+  ~~~~~~~~~~ optional steps ~~~~~~~~~~
+  |  python -m venv .env             |
+  |  run ./.env/Scripts/activate.bat |
+  |  pip install -m requirements.txt |
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  cd ./PSEC-Hangman/src/scripts
+  python hangman.py
+```
+
