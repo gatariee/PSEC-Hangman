@@ -3,14 +3,20 @@ import time as t
 from styles import Styles as s
 import ast
 
-padding = "=" * 25
+PADDING = "=" * 25
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-def admin_banner(num):
+def admin_banner(num: int) -> None:
+    """
+    Prints the admin banner
+    Args:
+        num (int): The index of the banner to print
+
+    """
     if num == 1:
         os.system("cls")
-        print(s.pr_bold((f"{padding} ~ MENU ~ {padding}\n")))
+        print(s.pr_bold((f"{PADDING} ~ MENU ~ {PADDING}\n")))
         print(
-            f"\t\tYou have selected: {s.pr_bold('Word Settings')}\n\n{s.pr_bold(padding * 2 + '==========')}\n"
+            f"\t\tYou have selected: {s.pr_bold('Word Settings')}\n\n{s.pr_bold(PADDING * 2 + '==========')}\n"
         )
         print(f"\t\t\t{s.pr_bold('1')}: Add word")
         t.sleep(0.05)
@@ -47,7 +53,7 @@ def admin_banner(num):
         except FileNotFoundError:
             print("Error. Settings not found. ")
         os.system("cls")
-        print(s.pr_bold((f"\n\n\n{padding} ~ MENU ~ {padding}\n")))
+        print(s.pr_bold((f"\n\n\n{PADDING} ~ MENU ~ {PADDING}\n")))
         print(f"\tYou have selected: {s.pr_bold('Game Settings')}\n")
         t.sleep(0.05)
         print(f"\t\tNumber of sessions: {s.pr_bold(obj['number of attempts'])}")
@@ -57,7 +63,7 @@ def admin_banner(num):
         )
         t.sleep(0.05)
         print(
-            f"\t\tNumber of top players on leaderboard: {s.pr_bold(obj['number of top players'])}\n\n{s.pr_bold(padding * 2 + '==========')}\n"
+            f"\t\tNumber of top players on leaderboard: {s.pr_bold(obj['number of top players'])}\n\n{s.pr_bold(PADDING * 2 + '==========')}\n"
         )
         print(f" {s.pr_bold('1')}: Edit number of sessions")
         t.sleep(0.05)
@@ -68,9 +74,9 @@ def admin_banner(num):
         print(f" {s.pr_bold('4')}: Back\n")
     elif num == 4:
         os.system("cls")
-        print(s.pr_bold((f"{padding} ~ MENU ~ {padding}\n")))
+        print(s.pr_bold((f"{PADDING} ~ MENU ~ {PADDING}\n")))
         print(
-            f"\tYou have selected: {s.pr_bold('View Reports')}\n\n{s.pr_bold(padding * 2 + '==========')}\n"
+            f"\tYou have selected: {s.pr_bold('View Reports')}\n\n{s.pr_bold(PADDING * 2 + '==========')}\n"
         )
         print(f"\t\t{s.pr_bold('1')}: Print Leaderboard")
         t.sleep(0.05)
@@ -81,9 +87,9 @@ def admin_banner(num):
         print(f"\t\t{s.pr_bold('4')}: Back")
     elif num == 5:
         os.system("cls")
-        print(s.pr_bold((f"{padding} ~ MENU ~ {padding}\n")))
+        print(s.pr_bold((f"{PADDING} ~ MENU ~ {PADDING}\n")))
         print(
-            f"\tYou have selected: {s.pr_bold('Admin Settings')}\n\n{s.pr_bold(padding * 2 + '==========')}\n"
+            f"\tYou have selected: {s.pr_bold('Admin Settings')}\n\n{s.pr_bold(PADDING * 2 + '==========')}\n"
         )
         print(f"\t\t{s.pr_bold('1')}: Create Admin")
         t.sleep(0.05)

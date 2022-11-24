@@ -1,7 +1,6 @@
 import json
 import ast
-import os
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 
 def read_word():
     with open("./words.txt", "r") as f:
