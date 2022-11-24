@@ -451,6 +451,7 @@ def solve_vowels(game, vowels):
                 before = game.guess_progress[: i * 2]
                 after = game.guess_progress[i * 2 + 1 :]
                 game.guess_progress = before + vowel + after
+                game.previous_guesses.append(vowel)
 def print_leaderboard(num: int) -> None:
     """
     _summary_
@@ -572,7 +573,13 @@ def begin(player_name: str) -> None:
         guess = input("Guess ('0' to activate lifeline): ")
         if(guess == "0"):
             os.system('cls')
-            print(f"{padding}\nLifelines: \n1. Show Vowels\n2. Show Meaning\n3. Quit\n{padding}")
+            temp_vowels = s.pr_green("Show Vowels")
+            temp_meaning = s.pr_green("Show Meaning")
+            if lifeline_vowel:
+                temp_vowels = s.pr_red("Show Vowels")
+            if lifeline_meaning:
+                temp_meaning = s.pr_red("Show Meaning")
+            print(f"{padding}\nLifelines: \n1. {temp_vowels}\n2. {temp_meaning}\n3. Back\n{padding}")
             while(1):
                 lifeline = input("Enter lifeline: ")
                 check, err = validate_input(user_input=lifeline, choice=4)
@@ -599,20 +606,29 @@ def begin(player_name: str) -> None:
                     }
                     for vowel in vowels:
                         vowel_obj[vowel] += 1
-                    print(f"{padding}\nVowels: ")
+                    print(padding)
+                    print(s.pr_green("\nVowels found! \n"))
                     for vowel in vowel_obj:
                         if vowel_obj[vowel] != 0:
                             print(f"{vowel} - {vowel_obj[vowel]}")
+                    print(f"{padding}\n")
                     input("Press enter to continue. ")
                     solve_vowels(hang_man, vowels)
                     lifeline_vowel = True
                     os.system('cls')
             elif int(lifeline) == 2:
-                print('2')
-                input("Press enter to continue. ")
+                if(lifeline_meaning == True):
+                    os.system('cls')
+                    print(s.pr_red("You have already used this lifeline. "))
+                    continue
+                lifeline_meaning = True
+                # print the meaning of the word
+                os.system('cls')
+                print(f"\n\n{padding}\n")
+                print(f"The meaning of the word is: \n\"{hang_man.meaning}\"\n")
             elif int(lifeline) == 3:
-                print('3')
-                input("Press enter to continue. ")
+                os.system('cls')
+                continue
         else:
             hang_man.guess_letter(letter=guess)
         print(padding)
