@@ -138,12 +138,5 @@
         "difficulty": "Complex",
         "type": "Idioms-Proverbs",
         "enabled": "on"
-    },
-    {
-        "word": " ",
-        "meaning": "",
-        "difficulty": "Simple",
-        "type": "Idioms-Proverbs",
-        "enabled": "on"
     }
 ]
