@@ -70,16 +70,13 @@ def validate_input(userin: int | str, options: list | str) -> tuple[bool, str]:
         if not userin.isnumeric():
             return False, s.pr_red(s="Invalid input. Please try again.")
         return True, ""
-    if(userin.isnumeric()):
+    if userin.isnumeric():
         if int(userin) not in options:
             return False, s.pr_red(s="Invalid input. Please try again.")
         return True, ""
     if userin not in options:
         return False, s.pr_red(s="Invalid input. Please try again.")
-
-
-
-
+    return True, ""
 def check_login(input_username: str, input_password: str) -> bool:
     """
     Checks if the username and password are correct.
@@ -137,21 +134,15 @@ def add_word() -> None:
     """
     word = input('Enter Word ("0" to exit): ').lower()
     numbers = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
-    if len(word) == 0:
-        print("Word cannot be empty.")
-        input("Press Enter to continue...")
-        return
-    if(word.isnumeric()):
-        print(s.pr_red("Invalid input. Please try again."))
+    if(word.startswith(" ") or word == ""):
+        print("Word cannot start with a space.")
         input("Press enter to continue...")
         return
-    for i in range(len(word)):
-        if word[i] in numbers:
-            print(s.pr_red("Word cannot contain numbers."))
-            input("Press Enter to continue...")
+    for letter in word:
+        if letter in numbers:
+            print("Word cannot contain numbers.")
+            input("Press enter to continue...")
             return
-    if word == "0":
-        return
     if " " in word:
         word_type = "Idioms-Proverbs"
         if len(word.split()) > 8:
@@ -164,9 +155,21 @@ def add_word() -> None:
             diff = "Complex"
         else:
             diff = "Simple"
+    meaning = input("Enter Meaning: ").lower()
+    if meaning == "0":
+        return
+    if meaning.startswith(" ") or meaning == "":
+        print("Meaning cannot start with a space.")
+        input("Press enter to continue...")
+        return
+    for letter in meaning:
+        if letter in numbers:
+            print("Meaning cannot contain numbers.")
+            input("Press enter to continue...")
+            return
     new_word = {
         "word": word,
-        "meaning": input("Enter meaning: ").lower(),
+        "meaning": meaning,
         "difficulty": diff,
         "type": word_type,
         "enabled": "on",
@@ -176,10 +179,11 @@ def add_word() -> None:
         obj.append(new_word)
     else:
         obj = read_file(file="../data/word_list.txt")
-        for i in range(len(obj)):
-            if obj[i]["word"] == word:
-                print(PADDING)
-                print("Word already exists!")
+        for item in obj:
+            if item["word"] == word:
+                print("Word already exists.")
+                input("Press enter to continue...")
+                return
         obj.append(new_word)
     new = json.dumps(obj, indent=4)
     write_file(file = "../data/word_list.txt", data = new)
@@ -202,8 +206,8 @@ def remove_word() -> None:
         check, index = False, 0
         os.system("cls")
         print(PADDING * 4 + "\n")
-        for i in range(len(obj)):
-            print(f"\t\t{s.pr_bold(i+1)}: {obj[i]['word']}")
+        for i, item in enumerate(obj):
+            print(f"{i + 1}. {item['word']}")
         word = input(
             f"\n{PADDING*4}\nEnter the word you want to remove ('0' to exit):  "
         )
@@ -236,8 +240,8 @@ def edit_word() -> None:
         check, index = False, 0
         os.system("cls")
         print(PADDING * 2 + "\n")
-        for i in range(len(obj)):
-            print(f"\t\t{s.pr_bold(i+1)}: {obj[i]['word']}")
+        for i, item in enumerate(obj):
+            print(f"{i + 1}. {item['word']}")
         word = input(f"\n{PADDING*2}\nEnter the word you want to edit ('0' to exit):  ")
         if word.isnumeric():
             check, index = (
@@ -246,6 +250,7 @@ def edit_word() -> None:
         for i in range(len(obj)):
             if (obj[i]["word"] == word.lower()) or check:
                 while 1:
+                    os.system("cls")
                     if index != 0:
                         i = index
                     print(PADDING * 2)
@@ -261,7 +266,7 @@ def edit_word() -> None:
                     choice = input(">> ")
                     print(PADDING)
                     if choice == "1":
-                        obj[i]["word"] = input("Enter new word: ")
+                        obj[i]["word"] = input("Enter new word: ").lower()
                     elif choice == "2":
                         obj[i]["meaning"] = input("Enter new meaning: ")
                     elif choice == "3":
@@ -279,9 +284,8 @@ def edit_word() -> None:
                 return
         if word == "0":
             return
-        else:
-            print("Word not found. Please try again.")
-            input("Press Enter to continue...")
+        print("Word not found. Please try again.")
+        input("Press Enter to continue...")
 
 
 def view_words() -> None:
@@ -312,8 +316,8 @@ def reset_words() -> None:
     """
     Resets the word list to empty
     """
-    yn = input("Are you sure you want to reset the word list? (Y/y to confirm)): ")
-    if yn.lower() == "y":
+    y_n = input("Are you sure you want to reset the word list? (Y/y to confirm)): ")
+    if y_n.lower() == "y":
         try:
             with open("../data/word_list.txt", "w") as f:
                 f.truncate(0)
@@ -417,7 +421,7 @@ def toggle_specific() -> None:
     user_input = input("Enter index of word to toggle: ")
     options = [i for i in range(1, len(obj) + 1)]
     check, err = validate_input(userin = user_input, options = "int")
-    if(check):
+    if check:
         user_input = int(user_input)
         if user_input in options:
             if obj[user_input - 1]["enabled"] == "on":
@@ -477,9 +481,8 @@ def edit_guesses() -> None:
             print(s.pr_green("Successfully updated number of guesses."))
             input("Press Enter to continue...")
             break
-        else:
-            print(err)
-            input("Press Enter to continue...")
+        print(err)
+        input("Press Enter to continue...")
 
 
 def edit_top() -> None:
@@ -501,9 +504,8 @@ def edit_top() -> None:
             print(s.pr_green("Successfully updated number of top scores."))
             input("Press Enter to continue...")
             break
-        else:
-            print(err)
-            input("Press Enter to continue...")
+        print(err)
+        input("Press Enter to continue...")
 
 
 ###############################################################
@@ -577,7 +579,7 @@ def search_date() -> None:
         print("Start date can not be larger than end date.")
         input("Press Enter to continue...")
         return
-    elif (start_date == end_date) or (start_date == "" and end_date == ""):
+    if (start_date == end_date) or (start_date == "" and end_date == ""):
         print("Invalid date range.")
         input("Press Enter to continue...")
         return
@@ -621,13 +623,13 @@ def remove_log() -> None:
     logs = read_file(file = "../data/game_logs.txt")
     while 1:
         print(f"{PADDING*2}\n")
-        print(f"List of players:")
+        print("List of players:")
         print(f"{PADDING*2}\n")
         for i, log in enumerate(logs, start=1):
             print(f"\t{s.pr_bold(i)}: {log['player']}")
         print(f"\n{PADDING*2}\n")
         name = input("Enter player number to remove (0) to exit: ")
-        if(name == "0"):
+        if name == "0":
             break
         check, err = validate_input(userin = name, options = "int")
         if check:
@@ -639,7 +641,7 @@ def remove_log() -> None:
                 del logs[name - 1]
                 new = json.dumps(logs, indent=4)
                 write_file(file = "../data/game_logs.txt", data = new)
-                print(s.pr_green(f"Successfully removed."))
+                print(s.pr_green("Successfully removed."))
                 input("Press Enter to continue...")
                 break
         else:

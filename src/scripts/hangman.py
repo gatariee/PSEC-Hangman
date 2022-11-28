@@ -581,13 +581,12 @@ def init_game_settings() -> object:
             game_settings = ast.literal_eval(f.read())
             game_settings["attempts"] = game_settings["number of attempts"]
             game_settings["guesses"] = game_settings["number of guesses"]
-            game_settings["words"] = game_settings["number of words"]
             game_settings["top"] = game_settings["number of top players"]
             # Completely unnecessary but good for my sanity
             del (
                 game_settings["number of attempts"],
-                game_settings["number of words"],
                 game_settings["number of top players"],
+                game_settings["number of guesses"],
             )
             return game_settings
     except FileNotFoundError:
