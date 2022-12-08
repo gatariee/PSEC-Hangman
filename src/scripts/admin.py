@@ -8,7 +8,52 @@ import sys
 from getpass import getpass
 from styles import Styles as s
 from banner import admin_banner as banner
+class LoginManager:
+    def __init__(self, attempts: int) -> None:
+        self.attempts = attempts
+    def check_login(self, input_username: str, input_password: str) -> bool:
+        """
+        Checks if the username and password are correct.
 
+        Args:
+            username (str): The username.
+            password (str): The password.
+
+        Returns:
+            bool: True if the username and password are correct, False otherwise.
+        """
+        admins = read_file(file="../data/admin.txt")
+        password = hashlib.sha256(input_password.encode()).hexdigest()
+        for admin in admins:
+            if admin["username"] == input_username and admin["password"] == password:
+                return True
+        return False
+    def login(self) -> tuple[bool, int]:
+        """
+        Logs the user in.
+
+        Returns:
+            tuple[bool, int]: A tuple containing a boolean value and an integer value.
+            bool: True if the user has successfully logged in, False otherwise.
+        """
+        while(1):
+            os.system("cls")
+            print("\n\n")
+            banner(6)
+            username = input(s.pr_bold(s="Username: "))
+            t.sleep(0.1)
+            password = getpass(s.pr_bold(s="Password: "))
+            if self.check_login(input_username=username, input_password=password):
+                print("Successfully logged in.")
+                return True
+            if self.attempts:
+                print(f"Invalid credentials. You have {self.attempts} attempts left.")
+                input("Press enter to continue...")
+                self.attempts -= 1
+            else:
+                print("You have exceeded the number of attempts allowed.")
+                input("Press enter to continue...")
+                return False
 # General Functions
 def read_file(file: str) -> list | None:
     """
@@ -927,13 +972,10 @@ def main() -> None:
     """
     # Change directory to the directory of the script
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    attempts = 3
-    while attempts >= 0:
-        check, attempts = login(num_attempts = attempts)
-        if check:
-            break
-    if attempts < 0:
-        print("Too many failed attempts. Exiting...")
+    # start the login, if attempts are exceeded, exit
+    login_session = LoginManager(attempts = 3)
+    if not login_session.login():
+        print(s.pr_red(("\nExiting...")))
         sys.exit()
     while 1:
         choice = menu()
