@@ -28,7 +28,7 @@ class LoginManager:
             if admin["username"] == input_username and admin["password"] == password:
                 return True
         return False
-    def login(self) -> tuple[bool, int]:
+    def login(self) -> bool:
         """
         Logs the user in.
 

@@ -120,14 +120,18 @@ class Game:
 
     def calculate_points(self) -> int:
         """
-        This method is called everything a guess is made and calculates the points earned.
+        This method is called every time a guess is made and calculates the points earned.
 
         Returns:
             int: The points earned
         """
-        # (the number of letters in the word, removing underscores) * (2 points per correct guess)
-        # e.g (_est = 3 letters, 2 points per correct guess = 6 points)
-        return len((self.guess_progress).replace("_", " ").replace(" ", "")) * 2
+        # Remove underscores and spaces from the guess_progress string
+        stripped_guess_progress = self.guess_progress.replace("_", "").replace(" ", "")
+
+        # Calculate the points earned by multiplying the number of correct letters by 2
+        points = len(stripped_guess_progress) * 2
+
+        return points
 
     def guess_letter(self, letter: str) -> None:
         """
@@ -136,30 +140,54 @@ class Game:
         Args:
             letter (str): The letter guessed
         """
-        lowercase_alphabets = "abcdefghijklmnopqrstuvwxyz"
-        uppercase_alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        punctuation = "'!?,"
-        allowed_chars = lowercase_alphabets + uppercase_alphabets + punctuation
+
+        def validate_guess():
+            """
+            This function validates the input of the player.
+            """
+            # list of lowercase, uppercase, and punctuation characters allowed in the input
+            LOWERCASE = "abcdefghijklmnopqrstuvwxyz"
+            UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            PUNCTUATION = "'!?,"
+            ALLOWED_CHARS = LOWERCASE + UPPERCASE + PUNCTUATION
+
+            # check if the input is a single character
+            if len(letter) != 1:
+                os.system("cls")
+                print(PADDING)
+                print(s.pr_red("Please enter a single letter."))
+                return False
+
+            # check if the input is an allowed character
+            if letter not in ALLOWED_CHARS:
+                os.system("cls")
+                print(PADDING)
+                print(s.pr_red("Please enter a valid character."))
+                return False
+
+            # check if the input has been previously guessed
+            if letter in self.previous_guesses:
+                os.system("cls")
+                print(PADDING)
+                print(s.pr_red("You have already guessed that letter."))
+                return False
+
+            # if the input is valid, return True
+            return True
+
         # Validation
-        if len(letter) != 1:
-            os.system("cls")
-            print(PADDING)
-            print(s.pr_red("Please enter a single letter."))
-            return
-        if letter not in allowed_chars:
-            os.system("cls")
-            print(PADDING)
-            print(s.pr_red("Please enter a valid character."))
-            return
-        if letter in self.previous_guesses:
-            os.system("cls")
-            print(PADDING)
-            print(s.pr_red("You have already guessed that letter."))
+        if not validate_guess():
             return
 
+        # initialize a count variable
         count = 0
-        if letter.lower() in self.word:  # if letter is in the word
+
+        # check if the guessed letter is in the word
+        if letter.lower() in self.word:
+            # loop through each character in the word
             for i, char in enumerate(self.word):
+                # if the character matches the guessed letter,
+                # increment the count and update the guess_progress string
                 if char == letter.lower():
                     count += 1
                     self.guess_progress = (
@@ -167,17 +195,21 @@ class Game:
                         + letter.lower()
                         + self.guess_progress[i * 2 + 1 :]
                     )
-        if (
-            count == 0
-        ):  # if count has not been incremented, the letter is not in the word
+
+        # if the letter is not in the word,
+        # increment the number of guesses and add the letter to the incorrect_list
+        if (count == 0):
             self.guesses += 1
             self.incorrect_list.append(letter)
             os.system("cls")
             print(
                 f"{PADDING}\nIncorrect! You have "
-                + str(settings["guesses"] - self.guesses)
-                + " guesses left. "
-            )
+            + str(settings["guesses"] - self.guesses)
+            + " guesses left. "
+        )
+
+        # if there are more than one of the guessed letter in the word,
+        # print a message indicating the number of occurrences of the letter
         elif count > 1:
             os.system("cls")
             print(
@@ -187,9 +219,14 @@ class Game:
                 + letter
                 + "'s. "
             )
+
+        # if there is only one of the guessed letter in the word,
+        # print a message indicating the occurrence of the letter
         elif count == 1:
             os.system("cls")
             print(f"{PADDING}\nCongratulations. There is 1 " + letter + ". ")
+
+        # append the guessed letter to the previous_guesses list
         self.previous_guesses.append(letter)
 
 
@@ -200,20 +237,33 @@ def end_game(log_file: dict) -> None:
     Args:
         log_file (dict): The log file
     """
+    # Open the game_logs.txt file in read-write mode
     with open("../data/game_logs.txt", "r+") as f:
         if os.stat("../data/game_logs.txt").st_size == 0:
-            obj = []
-            obj.append(log_file)
+            # If the file is empty, create a new list with the log_file as the first element
+            log_list = [log_file]
         else:
-            obj = ast.literal_eval(f.read())
-            obj.append(log_file)
-        new = json.dumps(obj, indent=4)
+            # If the file is not empty, read the existing log file and append the log_file
+            log_list:list = ast.literal_eval(f.read())
+            log_list.append(log_file)
+
+        # Convert the log_list to a JSON_formatted string ( this is unnecessary but i like it )
+        log_string = json.dumps(log_list, indent=4)
+
+        # Overwrite the existing game_logs.txt file with the new log_string
         f.seek(0)
         f.truncate(0)
-        f.write(str(new))
+        f.write(log_string)
+
+    # Print the game ending message
     print(f"You have ended the game with {s.pr_green(log['points'])} points.")
     print(
-        f"Here is what we are logging: \n{PADDING2}\n\t  Name: {log['player']}\n\t  Points: {log['points']}\n\t  Date: {log['date']}\n{PADDING2}"
+        f"Here is what we are logging: \n"
+        f"{PADDING2}\n"
+        f"\t  Name: {log['player']}\n"
+        f"\t  Points: {log['points']}\n"
+        f"\t  Date: {log['date']}\n"
+        f"{PADDING2}"
     )
 
 
@@ -231,39 +281,49 @@ def pick_word() -> tuple[str, str, str, bool, int]:
     """
 
     def read_words() -> list:
-        """_summary_
+        """Reads the list of words from a file and returns it as a list of dictionaries.
 
         Returns:
-            list: This is a list of words
+            list: This is a list of dictionaries, where each dictionary contains information
+                about a single word, including the word itself, its meaning, and its difficulty.
         """
         try:
             with open("../data/word_list.txt", "r") as f:
                 wordlist = ast.literal_eval(f.read())
                 return wordlist
         except FileNotFoundError:
-            print(
-                "Error, wordlist is empty. Please contact an administrator for assistance."
-            )
+            print("Error, wordlist is empty. Please contact an administrator for assistance.")
             sys.exit()
 
     wordlist = read_words()
-    rand_index = random.randint(0, len(wordlist) - 1)
-    while (
-        rand_index in previous_words or wordlist[rand_index]["enabled"] != "on"
-    ):  # checklist: 1.3
-        rand_index = random.randint(0, len(wordlist) - 1)
-    previous_words.append(rand_index)
-    word, word_meaning, difficulty = (
-        wordlist[rand_index]["word"],
-        wordlist[rand_index]["meaning"],
-        wordlist[rand_index]["difficulty"],
-    )
+
+    # create a list of words that are enabled
+    enabled_words = [word for word in wordlist if word["enabled"] == "on"]
+
+    # create a list of words that are not in the previous words list
+    usable_words = [word for word in enabled_words if word["word"] not in previous_words]
+
+    # select a random word from the usable words
+    selected_word = random.choice(usable_words)
+
+    # add the selected word to the previous words list
+    previous_words.append(selected_word["word"])
+
+    # unpack the selected word into separate variables
+    word, word_meaning, difficulty = selected_word["word"], selected_word["meaning"], selected_word["difficulty"]
+
     space = False
     index_of_space = []
-    for letter in enumerate(word):
-        if letter[1] == " ":
-            word = word[: letter[0]] + "_" + word[letter[0] + 1 :]
-            index_of_space.append(letter[0])
+
+    # loop through each letter in the word
+    for i, letter in enumerate(word):
+        # check if the current letter is a space
+        if letter == " ":
+            # replace the space with an underscore
+            word = word[: i] + "_" + word[i + 1 :]
+            # add the index of the space to the index_of_space list
+            index_of_space.append(i)
+            # this will be useful later, i promise
             space = True
     return word, word_meaning, difficulty, space, index_of_space
 
@@ -301,7 +361,7 @@ def menu() -> int:
         input(f"{err}\nPress Enter to continue...")
 
 
-def banner(game: object, session: int, user_choice: int) -> None:
+def banner(game: Game, session: int, user_choice: int) -> None:
     """
     This function prints the banner of the game.
 
@@ -313,25 +373,32 @@ def banner(game: object, session: int, user_choice: int) -> None:
     if user_choice == 1:
         os.system("cls")
         print("Your word is " + str(len(game.word)) + " letters long. ")
-    elif user_choice == 3:
-        print("Session: " + str(session) + " / " + str(settings["attempts"]))
-        if len(game.index_of_space) > 0:
-            # replace the underscores with spaces
-            new_guess_progress = game.guess_progress
+    elif user_choice == 2:
+        def format_phrase(phrase: str) -> str:
             for i in game.index_of_space:
-                new_guess_progress = (
-                    new_guess_progress[: i * 2] + " " + new_guess_progress[i * 2 + 1 :]
+                phrase = (
+                    phrase[: i * 2] + " " + phrase[i * 2 + 1 :]
                 )
-            print(f"Word: {new_guess_progress}")
+            return phrase
+        print("Session: {} / {}".format(session, settings["attempts"]))
+        if len(game.index_of_space) > 0: 
+            # If the word contains a space(phrase)
+            formatted_phrase = format_phrase(game.guess_progress)
+            print("Phrase: {}".format(formatted_phrase))
         else:
-            print("Word: " + game.guess_progress)
+            # normal game, word
+            print("Word: {}".format(game.guess_progress))
         print(
-            f"Incorrect Guesses ({len(game.incorrect_list)}): {', '.join(game.incorrect_list)}"
+            "Incorrect Guesses ({}): {}".format(
+                len(game.incorrect_list), ", ".join(game.incorrect_list)
+            )
         )
         print(
-            f"Correct Guesses: {', '.join(list(set(game.previous_guesses) - set(game.incorrect_list)))}"
+            "Correct Guesses: {}".format(
+                ", ".join(list(set(game.previous_guesses) - set(game.incorrect_list)))
+            )
         )
-        print("Guesses remaining: " + str(settings["guesses"] - game.guesses))
+        print("Guesses remaining: {}".format(settings["guesses"] - game.guesses))
         print_hangman(guess_num=game.guesses)
 
 
@@ -363,7 +430,7 @@ def print_hangman(guess_num: int) -> None:
     match guess_num:
         case 0:
             print(
-                r"""            +---+
+                r"""                +---+
                 |   |
                     |
                     |
@@ -373,7 +440,7 @@ def print_hangman(guess_num: int) -> None:
             )
         case 1:
             print(
-                r"""            +---+
+                r"""                +---+
                 |   |
                 O   |
                 |   |
@@ -383,41 +450,41 @@ def print_hangman(guess_num: int) -> None:
             )
         case 2:
             print(
-                r"""            +---+
+                r"""                +---+
                 |   |
                 O   |
-            /|   |
+               /|   |
                     |
                     |
                 ========="""
             )
         case 3:
             print(
-                r"""            +---+
+                r"""                +---+
                 |   |
                 O   |
-            /|\  |
+               /|\  |
                     |
                     |
                 ========="""
             )
         case 4:
             print(
-                r"""            +---+
+                r"""                +---+
                 |   |
                 O   |
-            /|\  |
-            /    |
+               /|\  |
+               /    |
                     |
                 ========="""
             )
         case 5:
             print(
-                r"""            +---+
+                r"""                +---+
                 |   |
                 O   |
-            /|\  |
-            / \  |
+               /|\  |
+               / \  |
                     |
                 ========="""
             )
@@ -441,9 +508,9 @@ def validate_input(user_input: str | int, user_choice: int) -> tuple[bool, str]:
         alphabets_lower = list(map(chr, range(97, 123)))
         alphabets_upper = list(map(chr, range(65, 91)))
         special_chars = ["-", "/", "!"]
-        allowed_chars = alphabets_upper + alphabets_lower + special_chars
+        ALLOWED_CHARS = alphabets_upper + alphabets_lower + special_chars
         if (
-            not all(char in allowed_chars for char in user_input)
+            not all(char in ALLOWED_CHARS for char in user_input)
             or len(user_input) == 0
         ):
             return False, "Please enter a valid name. "
@@ -487,7 +554,7 @@ def find_vowels(word: str) -> list:
     return vowel_list
 
 
-def solve_vowels(game: object, vowels: list) -> None:
+def solve_vowels(game: Game, vowels: list) -> None:
     """
     This function solves the vowels in the word.
 
@@ -495,17 +562,14 @@ def solve_vowels(game: object, vowels: list) -> None:
         game (object): This is the game object.
         vowels (vowels): This is a list of vowels in the word.
     """
-    vowels_unique = []
-    for vowel in vowels:
-        if vowel not in vowels_unique:
-            vowels_unique.append(vowel)
-    for i in range(len(game.word)):
-        for vowel in vowels_unique:
-            if game.word[i] == vowel:
-                before = game.guess_progress[: i * 2]
-                after = game.guess_progress[i * 2 + 1 :]
-                game.guess_progress = before + vowel + after
-                game.previous_guesses.append(vowel)
+    vowels_unique = set(vowels)  # Convert vowels to a set to remove duplicates
+
+    for i, char in enumerate(game.word):
+        if char in vowels_unique:
+            guess_progress = list(game.guess_progress)
+            guess_progress[i*2] = char
+            game.guess_progress = "".join(guess_progress)
+            game.previous_guesses.append(char)
 
 
 def print_leaderboard(num: int) -> None:
@@ -622,18 +686,25 @@ def begin(player_name: str) -> None:
         (hang_man.guess_progress).replace(" ", "") != hang_man.word
     ):
         hang_man.calculate_points()
-        banner(game=hang_man, session=SESSION, user_choice=3)
+        banner(game=hang_man, session=SESSION, user_choice=2)
         guess = input("Guess ('0' to activate lifeline): ")
+        #### Lifelines ####
         if guess == "0":
             os.system("cls")
+            #####
             temp_vowels = s.pr_green("Show Vowels")
             temp_meaning = s.pr_green("Show Meaning")
             if lifeline_vowel:
                 temp_vowels = s.pr_red("Show Vowels")
             if lifeline_meaning:
                 temp_meaning = s.pr_red("Show Meaning")
+            ##### Checks if lifeline has been used, if so, it will be red. If not, it will be green
             print(
-                f"{PADDING}\nLifelines: \n1. {temp_vowels}\n2. {temp_meaning}\n3. Back\n{PADDING}"
+                f"{PADDING}\nLifelines: \n"
+                f"1. {temp_vowels}\n"
+                f"2. {temp_meaning}\n"
+                f"3. Back\n"
+                f"{PADDING}"
             )
             while 1:
                 lifeline = input("Enter lifeline: ")
@@ -656,7 +727,6 @@ def begin(player_name: str) -> None:
                         vowel_obj[vowel] += 1
                     print(PADDING)
                     print(s.pr_green("\nVowels found! \n"))
-                    # rewrite the following statements with .items()
                     for key, value in vowel_obj.items():
                         if value > 0:
                             print(f"{key} - {value}")
@@ -671,13 +741,13 @@ def begin(player_name: str) -> None:
                     print(s.pr_red("You have already used this lifeline. "))
                     continue
                 lifeline_meaning = True
-                # print the meaning of the word
                 os.system("cls")
                 print(f"\n\n{PADDING}\n")
                 print(f'The meaning of the word is: \n"{hang_man.meaning}"\n')
             elif int(lifeline) == 3:
                 os.system("cls")
                 continue
+            # End of Lifelines #
         else:
             hang_man.guess_letter(letter=guess)
         print(PADDING)
@@ -687,12 +757,18 @@ def begin(player_name: str) -> None:
         print(s.pr_green("\nWell Done! You have guessed the word. "))
     if hang_man.space is False:
         print(
-            f"After {len(hang_man.incorrect_list)} incorrect guesses and {len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. \nThe word was \"{hang_man.word}\".\nIts meaning is: '{hang_man.meaning}'"
+        f"After {len(hang_man.incorrect_list)} incorrect guesses and "
+        f"{len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. \n"
+        f"The word was \"{hang_man.word}\".\n"
+        f"Its meaning is: '{hang_man.meaning}'"
         )
     else:
         formatted_word = (hang_man.word).replace("_", " ")
         print(
-            f"After {len(hang_man.incorrect_list)} incorrect guesses and {len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. \nThe word was \"{formatted_word}\".\nIts meaning is: '{hang_man.meaning}'"
+        f"After {len(hang_man.incorrect_list)} incorrect guesses and "
+        f"{len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. \n"
+        f"The word was \"{formatted_word}\".\n"
+        f"Its meaning is: '{hang_man.meaning}'"
         )
     if SESSION < settings["attempts"]:
         SESSION += 1
