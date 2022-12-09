@@ -10,7 +10,9 @@ from styles import Styles as s
 from banner import admin_banner as banner
 class LoginManager:
     def __init__(self, attempts: int) -> None:
+        # Initialize the number of attempts
         self.attempts = attempts
+
     def check_login(self, input_username: str, input_password: str) -> bool:
         """
         Checks if the username and password are correct.
@@ -22,12 +24,20 @@ class LoginManager:
         Returns:
             bool: True if the username and password are correct, False otherwise.
         """
+        # Read the list of admin users from file
         admins = read_file(file="../data/admin.txt")
+
+        # Hash the password
         password = hashlib.sha256(input_password.encode()).hexdigest()
+
+        # Check if the input username and password match an admin user
         for admin in admins:
             if admin["username"] == input_username and admin["password"] == password:
                 return True
+
+        # If no match was found, return False
         return False
+
     def login(self) -> bool:
         """
         Logs the user in.
@@ -37,23 +47,34 @@ class LoginManager:
             bool: True if the user has successfully logged in, False otherwise.
         """
         while(1):
+            # Clear the screen
             os.system("cls")
+
+            # Print the login banner
             print("\n\n")
             banner(6)
+
+            # Ask the user for the username and password
             username = input(s.pr_bold(s="Username: "))
             t.sleep(0.1)
             password = getpass(s.pr_bold(s="Password: "))
+
+            # Check if the login is successful
             if self.check_login(input_username=username, input_password=password):
-                print("Successfully logged in.")
                 return True
+
+            # If the login failed
             if self.attempts:
+                # Print a message and reduce the number of attempts
                 print(f"Invalid credentials. You have {self.attempts} attempts left.")
                 input("Press enter to continue...")
                 self.attempts -= 1
             else:
+                # Exit
                 print("You have exceeded the number of attempts allowed.")
                 input("Press enter to continue...")
                 return False
+
 # General Functions
 def read_file(file: str) -> list | None:
     """
@@ -67,17 +88,21 @@ def read_file(file: str) -> list | None:
 
     """
     try:
+        # Check if the file is empty
         if os.stat(file).st_size == 0:
             print("File is empty. Please contact a system administrator")
             input("The program will now exit. Press enter to continue...")
             sys.exit()
+
+        # Read the file and return the contents as a list
         with open(file, "r") as f:
             return ast.literal_eval(f.read())
+
     except FileNotFoundError:
+        # If the file is not found, print an error message and return None
         print("Error. File not found. ")
         input("Press enter to continue. ")
         return None
-
 
 def write_file(file: str, data: str) -> None:
     """
@@ -91,11 +116,14 @@ def write_file(file: str, data: str) -> None:
         with open(file, "w") as f:
             f.seek(0)
             f.truncate(0)
+            # Write the data to the file
             f.write(str(data))
             return
     except FileNotFoundError:
+        # If the file is not found, print an error message
         print("Error. File not found. ")
         return
+
 
 
 def validate_input(userin: int | str, options: list | str) -> tuple[bool, str]:
@@ -122,53 +150,6 @@ def validate_input(userin: int | str, options: list | str) -> tuple[bool, str]:
     if userin not in options:
         return False, s.pr_red(s="Invalid input. Please try again.")
     return True, ""
-def check_login(input_username: str, input_password: str) -> bool:
-    """
-    Checks if the username and password are correct.
-
-    Args:
-        username (str): The username.
-        password (str): The password.
-
-    Returns:
-        bool: True if the username and password are correct, False otherwise.
-    """
-    admins = read_file(file="../data/admin.txt")
-    password = hashlib.sha256(input_password.encode()).hexdigest()
-    for admin in admins:
-        if admin["username"] == input_username and admin["password"] == password:
-            return True
-    return False
-
-
-def login(num_attempts: int) -> tuple[bool, int]:
-    """
-    Logs the user in.
-
-    Args:
-        attempts (int): The number of attempts the user has made.
-
-    Returns:
-        tuple[bool, int]: A tuple containing a boolean value and an integer value.
-        bool: True if the user has successfully logged in, False otherwise.
-        int: The number of attempts the user has made.
-
-    """
-    os.system("cls")
-    print("\n\n")
-    banner(6)
-    username = input(s.pr_bold(s="Username: "))
-    t.sleep(0.1)
-    password = getpass(s.pr_bold(s="Password: "))
-    if check_login(input_username=username, input_password=password):
-        print("Successfully logged in.")
-        return True, num_attempts
-    if num_attempts:
-        print(f"Invalid credentials. You have {num_attempts} attempts left.")
-        input("Press enter to continue...")
-    num_attempts -= 1
-    return False, num_attempts
-
 
 ################################################################
 ###                   1. Word Settings                       ###
@@ -177,17 +158,40 @@ def add_word() -> None:
     """
     Adds a word to the word list.
     """
-    word = input('Enter Word ("0" to exit): ').lower()
-    numbers = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
-    if(word.startswith(" ") or word == ""):
-        print("Word cannot start with a space.")
-        input("Press enter to continue...")
-        return
-    for letter in word:
-        if letter in numbers:
-            print("Word cannot contain numbers.")
-            input("Press enter to continue...")
+    def validate_word(word: str, option: int) -> bool:
+        numbers = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
+        if(option == 1):
+            if(word.startswith(" ") or word == ""):
+                print("Word cannot start with a space.")
+                input("Press enter to continue...")
+                os.system('cls')
+                return False
+            for letter in word:
+                if letter in numbers:
+                    print("Word cannot contain numbers.")
+                    input("Press enter to continue...")
+                    os.system('cls')
+                    return False
+            return True
+        if(option == 2):
+            if meaning.startswith(" ") or meaning == "":
+                print("Meaning cannot start with a space.")
+                input("Press enter to continue...")
+                os.system('cls')
+                return False
+            for letter in meaning:
+                if letter in numbers:
+                    print("Meaning cannot contain numbers.")
+                    input("Press enter to continue...")
+                    os.system('cls')
+                    return False
+            return True
+    while(1):
+        word = input('Enter Word ("0" to exit): ').lower()
+        if word == "0":
             return
+        if validate_word(word, 1):
+            break
     if " " in word:
         word_type = "Idioms-Proverbs"
         if len(word.split()) > 8:
@@ -200,18 +204,10 @@ def add_word() -> None:
             diff = "Complex"
         else:
             diff = "Simple"
-    meaning = input("Enter Meaning: ").lower()
-    if meaning == "0":
-        return
-    if meaning.startswith(" ") or meaning == "":
-        print("Meaning cannot start with a space.")
-        input("Press enter to continue...")
-        return
-    for letter in meaning:
-        if letter in numbers:
-            print("Meaning cannot contain numbers.")
-            input("Press enter to continue...")
-            return
+    while(1):
+        meaning = input("Enter Meaning: ").lower()
+        if validate_word(meaning, 2):
+            break
     new_word = {
         "word": word,
         "meaning": meaning,
