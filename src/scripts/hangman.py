@@ -30,14 +30,15 @@ https://stackoverflow.com/questions/17140886/how-to-search-and-replace-text-in-a
 https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
 
 Library/Module:
-- these modules are installed by default in python 3.10.8
-    os
-    sys
-    time
-    random
-    datetime
-    ast
-    json
+- these modules are installed by default in python 3.11
+    - os
+    - sys
+    - time
+    - typing
+    - random
+    - json
+    - datetime
+    - ast
 
 Known Issues:
     - tbd
@@ -105,13 +106,7 @@ class Game:
             player (str): Input name of player
         """
         self.player = player
-        (
-            self.word,
-            self.meaning,
-            self.difficulty,
-            self.space,
-            self.index_of_space,
-        ) = pick_word()
+        self.word, self.meaning, self.difficulty, self.space, self.index_of_space = pick_word()
         self.guesses = 0
         self.previous_guesses = []
         self.incorrect_list = []
@@ -141,7 +136,7 @@ class Game:
             letter (str): The letter guessed
         """
 
-        def validate_guess():
+        def validate_guess() -> bool:
             """
             This function validates the input of the player.
             """
@@ -497,7 +492,7 @@ def validate_input(user_input: str | int, user_choice: int) -> tuple[bool, str]:
 
     Args:
         user_input (str/int): this is the user input, could be a string or an integer. name or option
-        choice (int): this is the choice of validation. 1 for name, 2 for option, 3 for Y/N
+        choice (int): this is the choice of validation. 1 for name, 2 for option, 3 for lifeline
 
     Returns:
         tuple(bool,str):
@@ -505,22 +500,25 @@ def validate_input(user_input: str | int, user_choice: int) -> tuple[bool, str]:
             str: the error message if the input is invalid
     """
     if user_choice == 1:
-        alphabets_lower = list(map(chr, range(97, 123)))
-        alphabets_upper = list(map(chr, range(65, 91)))
-        special_chars = ["-", "/", "!"]
-        ALLOWED_CHARS = alphabets_upper + alphabets_lower + special_chars
-        if (
-            not all(char in ALLOWED_CHARS for char in user_input)
-            or len(user_input) == 0
-        ):
+        LOWERCASE = [chr(i) for i in range(97, 123)]
+        UPPERCASE = [chr(i) for i in range(65, 91)]
+        SP_CHARS = ["-", "/", "!"]
+        ALLOWED_CHARS = UPPERCASE + LOWERCASE + SP_CHARS
+        if not all(char in ALLOWED_CHARS for char in user_input) or len(user_input) == 0:
             return False, "Please enter a valid name. "
-        if os.stat("../data/game_logs.txt").st_size != 0:
-            with open("../data/game_logs.txt", "r") as f:
-                game_log = ast.literal_eval(f.read())
-                for value in game_log:
-                    if value["player"].lower() == user_input.lower():
-                        return False, "This name is already taken. "
+
+        # Check if the file is empty
+        if os.stat("../data/game_logs.txt").st_size == 0:
+            return True, None
+
+        # Check if the name is already taken
+        with open("../data/game_logs.txt", "r") as f:
+            game_log = ast.literal_eval(f.read())
+            for value in game_log:
+                if value["player"].lower() == user_input.lower():
+                    return False, "This name is already taken. "
         return True, None
+
     if user_choice == 2:
         if not user_input.isnumeric():
             return False, s.pr_red("Please enter a valid option.")
@@ -529,29 +527,25 @@ def validate_input(user_input: str | int, user_choice: int) -> tuple[bool, str]:
             if int(user_input) == option:
                 return True, None
         return False, s.pr_red("Please enter a valid option. ")
+
     if user_choice == 3:
         options = ["1", "2", "3"]
         if user_input not in options:
             return False, s.pr_red("Please enter a valid option. ")
         return True, None
 
-
-def find_vowels(word: str) -> list:
+def find_vowels(word: str) -> list[str]:
     """
-    This function finds the vowels in the word and returns a list of vowels.
+    Finds the vowels in the word and returns a list of vowels.
 
-    Arguments:
-        word {str}: This is the word the player has to guess.
+    Args:
+        word (str): The word the player has to guess.
 
     Returns:
-        list: This is a list of vowels in the word.
+        list[str]: The vowels in the word.
     """
     vowels = ["a", "e", "i", "o", "u"]
-    vowel_list = []
-    for char in word:
-        if char in vowels:
-            vowel_list.append(char)
-    return vowel_list
+    return [char for char in word if char in vowels]
 
 
 def solve_vowels(game: Game, vowels: list) -> None:
@@ -566,21 +560,19 @@ def solve_vowels(game: Game, vowels: list) -> None:
 
     for i, char in enumerate(game.word):
         if char in vowels_unique:
-            guess_progress = list(game.guess_progress)
-            guess_progress[i*2] = char
-            game.guess_progress = "".join(guess_progress)
+            game.guess_progress = game.guess_progress[:i*2] + char + game.guess_progress[i*2+1:]
             game.previous_guesses.append(char)
 
 
 def print_leaderboard(num: int) -> None:
     """
-    _summary_
+     Prints the leaderboard, showing the top players in terms of points.
 
     Args:
         num (_type_): this is the number of players to be displayed in the leaderboard
     """
 
-    def read_logs() -> dict:
+    def read_logs() -> list:
         """
         This function reads the game logs and returns a dictionary of the logs
 
@@ -589,8 +581,7 @@ def print_leaderboard(num: int) -> None:
         """
         try:
             with open("../data/game_logs.txt", "r") as f:
-                logs = ast.literal_eval(f.read())
-                return logs
+                return(ast.literal_eval(f.read()))
         except FileNotFoundError:
             print("Error. Game logs not found. ")
 
@@ -609,7 +600,7 @@ def search_player() -> None:
     This function searches for a player in the game logs
     """
 
-    def read_logs() -> dict:
+    def read_logs() -> list:
         """
         This function reads the game logs and returns a dictionary of the logs
 
@@ -618,8 +609,7 @@ def search_player() -> None:
         """
         try:
             with open("../data/game_logs.txt", "r") as f:
-                logs = ast.literal_eval(f.read())
-                return logs
+                return(ast.literal_eval(f.read()))
         except FileNotFoundError:
             print("Error. Game logs not found. ")
 
@@ -633,25 +623,19 @@ def search_player() -> None:
     print(f"{PADDING}\nPlayer not found. \n{PADDING}")
 
 
-def init_game_settings() -> object:
+def init_game_settings() -> dict | None:
     """
-    This function returns the game settings
+    Returns the game settings.
 
     Returns:
-        game_settings (object): the game settings
+        dict: The game settings.
     """
     try:
         with open("../data/game_settings.txt") as f:
-            game_settings = ast.literal_eval(f.read())
-            game_settings["attempts"] = game_settings["number of attempts"]
-            game_settings["guesses"] = game_settings["number of guesses"]
-            game_settings["top"] = game_settings["number of top players"]
-            # Completely unnecessary but good for my sanity
-            del (
-                game_settings["number of attempts"],
-                game_settings["number of top players"],
-                game_settings["number of guesses"],
-            )
+            game_settings: dict = ast.literal_eval(f.read())
+            game_settings["attempts"] = game_settings.pop("number of attempts", None)
+            game_settings["guesses"] = game_settings.pop("number of guesses", None)
+            game_settings["top"] = game_settings.pop("number of top players", None)
             return game_settings
     except FileNotFoundError:
         print("Error. game_settings.txt not found. ")
@@ -670,7 +654,64 @@ def main() -> None:
             break
         print(err)
 
+def use_lifeline(hang_man: Game) -> None:
+        global lifeline_vowel, lifeline_meaning
+        temp_vowels = s.pr_green("Show Vowels")
+        temp_meaning = s.pr_green("Show Meaning")
+        if lifeline_vowel:
+            temp_vowels = s.pr_red("Show Vowels")
+        if lifeline_meaning:
+            temp_meaning = s.pr_red("Show Meaning")
 
+        while 1:
+            os.system("cls")
+            print(
+            f"{PADDING}\nLifelines: \n"
+            f"1. {temp_vowels}\n"
+            f"2. {temp_meaning}\n"
+            f"3. Back\n"
+            f"{PADDING}"
+            )
+            lifeline = input("Enter lifeline: ")
+            check, err = validate_input(user_input=lifeline, user_choice=3)
+            if check:
+                break
+            print(err)
+            input("Press enter to continue. ")
+
+        if int(lifeline) == 1:
+            if lifeline_vowel is True:
+
+                print(s.pr_red("You have already used this lifeline. "))
+                return
+            os.system("cls")
+            vowels = find_vowels(hang_man.word)
+            if len(vowels) == 0:
+                print(s.pr_red("No vowels found. "))
+            else:
+                vowel_obj = {"a": 0, "e": 0, "i": 0, "o": 0, "u": 0}
+                for vowel in vowels:
+                    vowel_obj[vowel] += 1
+                print(PADDING)
+                print(s.pr_green("\nVowels found! \n"))
+                for key, value in vowel_obj.items():
+                    if value > 0:
+                        print(f"{key} - {value}")
+                print(f"{PADDING}\n")
+                input("Press enter to continue. ")
+                solve_vowels(hang_man, vowels)
+                lifeline_vowel = True
+                os.system("cls")
+        elif int(lifeline) == 2:
+            if lifeline_meaning is True:
+                os.system("cls")
+                print(s.pr_red("You have already used this lifeline. "))
+            lifeline_meaning = True
+            os.system("cls")
+            print(f"\n\n{PADDING}\n")
+            print(f'The meaning of the word is: \n"{hang_man.meaning}"\n')
+        elif int(lifeline) == 3:
+            os.system("cls")
 def begin(player_name: str) -> None:
     """
     this function begins the game
@@ -680,89 +721,49 @@ def begin(player_name: str) -> None:
     """
     global SESSION, lifeline_vowel, lifeline_meaning
     hang_man = Game(player_name)
+
+    # Display banner on the first session (important)
     if SESSION == 1:
         banner(game=hang_man, session=SESSION, user_choice=1)
+
+    # Keep playing until player runs out of guesses or guesses the word
     while (hang_man.guesses < settings["guesses"]) and (
         (hang_man.guess_progress).replace(" ", "") != hang_man.word
     ):
+        # Calculate the player's points at the start of every guess
         hang_man.calculate_points()
+        # Display the game banner
         banner(game=hang_man, session=SESSION, user_choice=2)
+        # Ask player to guess a letter or activate a lifeline
         guess = input("Guess ('0' to activate lifeline): ")
-        #### Lifelines ####
+
+    # If player chooses to activate a lifeline
         if guess == "0":
-            os.system("cls")
-            #####
-            temp_vowels = s.pr_green("Show Vowels")
-            temp_meaning = s.pr_green("Show Meaning")
-            if lifeline_vowel:
-                temp_vowels = s.pr_red("Show Vowels")
-            if lifeline_meaning:
-                temp_meaning = s.pr_red("Show Meaning")
-            ##### Checks if lifeline has been used, if so, it will be red. If not, it will be green
-            print(
-                f"{PADDING}\nLifelines: \n"
-                f"1. {temp_vowels}\n"
-                f"2. {temp_meaning}\n"
-                f"3. Back\n"
-                f"{PADDING}"
-            )
-            while 1:
-                lifeline = input("Enter lifeline: ")
-                check, err = validate_input(user_input=lifeline, user_choice=3)
-                if check:
-                    break
-                print(err)
-            if int(lifeline) == 1:
-                if lifeline_vowel is True:
-                    os.system("cls")
-                    print(s.pr_red("You have already used this lifeline. "))
-                    continue
-                os.system("cls")
-                vowels = find_vowels(hang_man.word)
-                if len(vowels) == 0:
-                    print(s.pr_red("No vowels found. "))
-                else:
-                    vowel_obj = {"a": 0, "e": 0, "i": 0, "o": 0, "u": 0}
-                    for vowel in vowels:
-                        vowel_obj[vowel] += 1
-                    print(PADDING)
-                    print(s.pr_green("\nVowels found! \n"))
-                    for key, value in vowel_obj.items():
-                        if value > 0:
-                            print(f"{key} - {value}")
-                    print(f"{PADDING}\n")
-                    input("Press enter to continue. ")
-                    solve_vowels(hang_man, vowels)
-                    lifeline_vowel = True
-                    os.system("cls")
-            elif int(lifeline) == 2:
-                if lifeline_meaning is True:
-                    os.system("cls")
-                    print(s.pr_red("You have already used this lifeline. "))
-                    continue
-                lifeline_meaning = True
-                os.system("cls")
-                print(f"\n\n{PADDING}\n")
-                print(f'The meaning of the word is: \n"{hang_man.meaning}"\n')
-            elif int(lifeline) == 3:
-                os.system("cls")
-                continue
-            # End of Lifelines #
+            os.system('cls')
+
+            # Use the lifeline
+            use_lifeline(hang_man=hang_man)
+
+        # If player chooses to guess a letter
         else:
+            # Make the guess
             hang_man.guess_letter(letter=guess)
         print(PADDING)
+
+    # The while loop has been exited, so the player has either guessed the word or run out of guesses
     if hang_man.guesses == settings["guesses"]:
         print(s.pr_red("\nYou have reached the maximum number of guesses. "))
+
     else:
         print(s.pr_green("\nWell Done! You have guessed the word. "))
-    if hang_man.space is False:
+    if hang_man.space is False: # formatting for non-spaces
         print(
         f"After {len(hang_man.incorrect_list)} incorrect guesses and "
         f"{len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. \n"
         f"The word was \"{hang_man.word}\".\n"
         f"Its meaning is: '{hang_man.meaning}'"
         )
-    else:
+    else: # formatting with spaces
         formatted_word = (hang_man.word).replace("_", " ")
         print(
         f"After {len(hang_man.incorrect_list)} incorrect guesses and "
