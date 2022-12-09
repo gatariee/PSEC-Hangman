@@ -618,7 +618,7 @@ def search_player() -> None:
     # checklist: 1. prompt for player name
     for item in logs:
         if item["player"].lower() == name.lower():
-            print(f"{PADDING}\n{item['player']} - {['points']} points\n{PADDING}")
+            print(f"{PADDING}\n{item['player']} - {item['points']} points\n{PADDING}")
             return
     print(f"{PADDING}\nPlayer not found. \n{PADDING}")
 
