@@ -1,4 +1,3 @@
-import ast
 import json
 import os
 import hashlib
@@ -96,7 +95,7 @@ def read_file(file: str) -> list | None:
 
         # Read the file and return the contents as a list
         with open(file, "r") as f:
-            return ast.literal_eval(f.read())
+            return json.loads((f.read()))
 
     except FileNotFoundError:
         # If the file is not found, print an error message and return None

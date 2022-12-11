@@ -44,11 +44,9 @@ Known Issues:
     - tbd
 
 """
-import ast
 import random
 import json
 import os
-import sys
 import time as t
 from datetime import date
 from styles import Styles as s
@@ -239,7 +237,7 @@ def end_game(log_file: dict) -> None:
             log_list = [log_file]
         else:
             # If the file is not empty, read the existing log file and append the log_file
-            log_list:list = ast.literal_eval(f.read())
+            log_list:list = json.loads(f.read())
             log_list.append(log_file)
 
         # Convert the log_list to a JSON_formatted string ( this is unnecessary but i like it )
@@ -284,11 +282,11 @@ def pick_word() -> tuple[str, str, str, bool, int]:
         """
         try:
             with open("../data/word_list.txt", "r") as f:
-                wordlist = ast.literal_eval(f.read())
+                wordlist = json.loads(f.read())
                 return wordlist
         except FileNotFoundError:
             print("Error, wordlist is empty. Please contact an administrator for assistance.")
-            sys.exit()
+            exit()
 
     wordlist = read_words()
 
@@ -513,7 +511,7 @@ def validate_input(user_input: str | int, user_choice: int) -> tuple[bool, str]:
 
         # Check if the name is already taken
         with open("../data/game_logs.txt", "r") as f:
-            game_log = ast.literal_eval(f.read())
+            game_log = json.loads(f.read())
             for value in game_log:
                 if value["player"].lower() == user_input.lower():
                     return False, "This name is already taken. "
@@ -581,7 +579,7 @@ def print_leaderboard(num: int) -> None:
         """
         try:
             with open("../data/game_logs.txt", "r") as f:
-                return(ast.literal_eval(f.read()))
+                return(json.loads(f.read()))
         except FileNotFoundError:
             print("Error. Game logs not found. ")
 
@@ -609,7 +607,7 @@ def search_player() -> None:
         """
         try:
             with open("../data/game_logs.txt", "r") as f:
-                return(ast.literal_eval(f.read()))
+                return(json.loads(f.read()))
         except FileNotFoundError:
             print("Error. Game logs not found. ")
 
@@ -632,7 +630,7 @@ def init_game_settings() -> dict | None:
     """
     try:
         with open("../data/game_settings.txt") as f:
-            game_settings: dict = ast.literal_eval(f.read())
+            game_settings: dict = json.loads(f.read())
             game_settings["attempts"] = game_settings.pop("number of attempts", None)
             game_settings["guesses"] = game_settings.pop("number of guesses", None)
             game_settings["top"] = game_settings.pop("number of top players", None)
@@ -815,8 +813,8 @@ if __name__ == "__main__":
                 case 3:
                     search_player()
                 case 4:
-                    sys.exit()
+                    exit()
             input("Press Enter to continue...")
     except KeyboardInterrupt:
         print(s.pr_red(("\nThank you for playing. ")))
-        sys.exit()
+        exit()
