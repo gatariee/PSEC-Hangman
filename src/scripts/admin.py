@@ -306,7 +306,20 @@ def edit_word() -> None:
                     choice = input(">> ")
                     print(PADDING)
                     if choice == "1":
-                        obj[i]["word"] = input("Enter new word: ").lower()
+                        temp_word = input("Enter new word: ").lower()
+                        if(" " in temp_word):
+                            obj[i]["type"] = "Idioms-Proverbs"
+                            if len(temp_word.split()) > 8:
+                                obj[i]["difficulty"] = "Complex"
+                            else:
+                                obj[i]["difficulty"] = "Simple"
+                        else:
+                            obj[i]["type"] = "Word"
+                            if len(temp_word) > 8:
+                                obj[i]["difficulty"] = "Complex"
+                            else:
+                                obj[i]["difficulty"] = "Simple"
+                        obj[i]["word"] = temp_word
                     elif choice == "2":
                         obj[i]["meaning"] = input("Enter new meaning: ")
                     elif choice == "3":
@@ -332,6 +345,7 @@ def view_words() -> None:
     """
     Displays all the words in the word list.
     """
+    os.system('cls')
     try:
         if os.stat("../data/word_list.txt").st_size == 0:
             print("Wordist is empty.")
@@ -487,12 +501,12 @@ def edit_session() -> None:
     while 1:
         os.system("cls")
         print(
-            f"{PADDING}\nCurrent number of sessions: {settings['number of attempts']}\n{PADDING}"
+            f"{PADDING}\nCurrent number of sessions: {settings['number of sessions']}\n{PADDING}"
         )
         session = input("Enter new number of sessions: ")
         check, err = validate_input(userin = session, options = "int")
         if check:
-            settings["number of attempts"] = int(session)
+            settings["number of sessions"] = int(session)
             new = json.dumps(settings, indent=4)
             write_file(file = "../data/game_settings.txt", data = new)
             print(s.pr_green("Successfully updated number of sessions."))

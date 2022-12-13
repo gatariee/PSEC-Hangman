@@ -1,5 +1,5 @@
 {
-    "number of guesses": 5,
-    "number of attempts": 3,
-    "number of top players": 5
+    "number of guesses": 10,
+    "number of sessions": 10,
+    "number of top players": 20
 }

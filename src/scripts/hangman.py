@@ -373,7 +373,7 @@ def banner(game: Game, session: int, user_choice: int) -> None:
                     phrase[: i * 2] + " " + phrase[i * 2 + 1 :]
                 )
             return phrase
-        print("Session: {} / {}".format(session, settings["attempts"]))
+        print("Session: {} / {}".format(session, settings["sessions"]))
         if len(game.index_of_space) > 0: 
             # If the word contains a space(phrase)
             formatted_phrase = format_phrase(game.guess_progress)
@@ -631,7 +631,7 @@ def init_game_settings() -> dict | None:
     try:
         with open("../data/game_settings.txt") as f:
             game_settings: dict = json.loads(f.read())
-            game_settings["attempts"] = game_settings.pop("number of attempts", None)
+            game_settings["sessions"] = game_settings.pop("number of sessions", None)
             game_settings["guesses"] = game_settings.pop("number of guesses", None)
             game_settings["top"] = game_settings.pop("number of top players", None)
             return game_settings
@@ -769,7 +769,7 @@ def begin(player_name: str) -> None:
         f"The word was \"{formatted_word}\".\n"
         f"Its meaning is: '{hang_man.meaning}'"
         )
-    if SESSION < settings["attempts"]:
+    if SESSION < settings["sessions"]:
         SESSION += 1
         log["points"] += hang_man.calculate_points()
         print(f"Your total points are {s.pr_bold(s = log['points'])}.\n")
