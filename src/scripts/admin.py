@@ -5,11 +5,18 @@ import time as t
 import datetime
 import sys
 from getpass import getpass
-from styles import Styles as s
+from styles import Styles as colours
+COLORS = colours()
 from banner import admin_banner as banner
 class LoginManager:
+    """
+    A class that manages user login attempts.
+
+    Args:
+        attempts (int): The number of attempts allowed.
+
+    """
     def __init__(self, attempts: int) -> None:
-        # Initialize the number of attempts
         self.attempts = attempts
 
     def check_login(self, input_username: str, input_password: str) -> bool:
@@ -42,7 +49,6 @@ class LoginManager:
         Logs the user in.
 
         Returns:
-            tuple[bool, int]: A tuple containing a boolean value and an integer value.
             bool: True if the user has successfully logged in, False otherwise.
         """
         while(1):
@@ -54,9 +60,9 @@ class LoginManager:
             banner(6)
 
             # Ask the user for the username and password
-            username = input(s.pr_bold(s="Username: "))
+            username = input(COLORS.pr_bold(s="Username: "))
             t.sleep(0.1)
-            password = getpass(s.pr_bold(s="Password: "))
+            password = getpass(COLORS.pr_bold(s="Password: "))
 
             # Check if the login is successful
             if self.check_login(input_username=username, input_password=password):
@@ -73,7 +79,6 @@ class LoginManager:
                 print("You have exceeded the number of attempts allowed.")
                 input("Press enter to continue...")
                 return False
-
 # General Functions
 def read_file(file: str) -> list | None:
     """
@@ -89,19 +94,14 @@ def read_file(file: str) -> list | None:
     try:
         # Check if the file is empty
         if os.stat(file).st_size == 0:
-            print("File is empty. Please contact a system administrator")
-            input("The program will now exit. Press enter to continue...")
-            sys.exit()
-
+            raise FileNotFoundError
         # Read the file and return the contents as a list
         with open(file, "r") as f:
             return json.loads((f.read()))
 
     except FileNotFoundError:
         # If the file is not found, print an error message and return None
-        print("Error. File not found. ")
-        input("Press enter to continue. ")
-        return None
+        return ""
 
 def write_file(file: str, data: str) -> None:
     """
@@ -140,14 +140,14 @@ def validate_input(userin: int | str, options: list | str) -> tuple[bool, str]:
     """
     if options == "int":
         if not userin.isnumeric():
-            return False, s.pr_red(s="Invalid input. Please try again.")
+            return False, COLORS.pr_red(s="Invalid input. Please try again.")
         return True, ""
     if userin.isnumeric():
         if int(userin) not in options:
-            return False, s.pr_red(s="Invalid input. Please try again.")
+            return False, COLORS.pr_red(s="Invalid input. Please try again.")
         return True, ""
     if userin not in options:
-        return False, s.pr_red(s="Invalid input. Please try again.")
+        return False, COLORS.pr_red(s="Invalid input. Please try again.")
     return True, ""
 
 ################################################################
@@ -228,11 +228,11 @@ def add_word() -> None:
     new = json.dumps(obj, indent=4)
     write_file(file = "../data/word_list.txt", data = new)
     os.system("cls")
-    print((f"Successfully added \"{s.pr_bold(new_word['word'])}\" to the word list."))
+    print((f"Successfully added \"{COLORS.pr_bold(new_word['word'])}\" to the word list."))
     print(PADDING * 2)
     print(f"The following attributes have been automatically added to the word: \n")
-    print(f"\tDifficulty: {s.pr_bold(new_word['difficulty'])}")
-    print(f"\tType: {s.pr_bold(new_word['type'])}\n")
+    print(f"\tDifficulty: {COLORS.pr_bold(new_word['difficulty'])}")
+    print(f"\tType: {COLORS.pr_bold(new_word['type'])}\n")
     print(PADDING * 2)
     input("Press Enter to continue...")
 
@@ -299,10 +299,10 @@ def edit_word() -> None:
                     print("\tCurrent type: ", obj[i]["type"])
                     print("\tCurrent difficulty: ", obj[i]["difficulty"] + "\n")
                     print(PADDING * 2)
-                    print(f"\n{s.pr_bold('1')}: Edit word")
-                    print(f"{s.pr_bold('2')}: Edit meaning")
-                    print(f"{s.pr_bold('3')}: Edit difficulty")
-                    print(f"{s.pr_bold('4')}: Save and exit")
+                    print(f"\n{COLORS.pr_bold('1')}: Edit word")
+                    print(f"{COLORS.pr_bold('2')}: Edit meaning")
+                    print(f"{COLORS.pr_bold('3')}: Edit difficulty")
+                    print(f"{COLORS.pr_bold('4')}: Save and exit")
                     choice = input(">> ")
                     print(PADDING)
                     if choice == "1":
@@ -356,9 +356,9 @@ def view_words() -> None:
         print(PADDING * 4 + "\n")
         for i in range(len(obj)):
             if obj[i]["enabled"] == "on":
-                print(s.pr_green((f"\t{s.pr_bold(i+1)}: {obj[i]['word']}")))
+                print(COLORS.pr_green((f"\t{COLORS.pr_bold(i+1)}: {obj[i]['word']}")))
             else:
-                print(s.pr_red((f"\t{s.pr_bold(i+1)}: {obj[i]['word']}")))
+                print(COLORS.pr_red((f"\t{COLORS.pr_bold(i+1)}: {obj[i]['word']}")))
         print(f"\n{PADDING * 4}\n")
     except FileNotFoundError:
         print("Error. Please contact an administrator")
@@ -401,20 +401,20 @@ def status_menu() -> None:
         for i in range(len(obj)):
             if obj[i]["enabled"] == "on":
                 enabled_counter += 1
-                print(s.pr_green((f"\t{s.pr_bold(i+1)}: {obj[i]['word']}")))
+                print(COLORS.pr_green((f"\t{COLORS.pr_bold(i+1)}: {obj[i]['word']}")))
             else:
                 disabled_counter += 1
-                print(s.pr_red((f"\t{s.pr_bold(i+1)}: {obj[i]['word']}")))
-        print(f"\n{s.pr_bold('Enabled')}: {enabled_counter}")
-        print(f"{s.pr_bold('Disabled')}: {disabled_counter}")
+                print(COLORS.pr_red((f"\t{COLORS.pr_bold(i+1)}: {obj[i]['word']}")))
+        print(f"\n{COLORS.pr_bold('Enabled')}: {enabled_counter}")
+        print(f"{COLORS.pr_bold('Disabled')}: {disabled_counter}")
         print(f"\n{PADDING * 4}\n")
-        print(f"{s.pr_bold('1')}: Toggle Words")
+        print(f"{COLORS.pr_bold('1')}: Toggle Words")
         t.sleep(0.05)
-        print(f"{s.pr_bold('2')}: Toggle Idiom-Proverbs")
+        print(f"{COLORS.pr_bold('2')}: Toggle Idiom-Proverbs")
         t.sleep(0.05)
-        print(f"{s.pr_bold('3')}: Toggle Specific")
+        print(f"{COLORS.pr_bold('3')}: Toggle Specific")
         t.sleep(0.05)
-        print(f"{s.pr_bold('4')}: Back")
+        print(f"{COLORS.pr_bold('4')}: Back")
         t.sleep(0.05)
         choice = input(">> ")
         check, err = validate_input(userin = choice, options = [1, 2, 3, 4])
@@ -509,7 +509,7 @@ def edit_session() -> None:
             settings["number of sessions"] = int(session)
             new = json.dumps(settings, indent=4)
             write_file(file = "../data/game_settings.txt", data = new)
-            print(s.pr_green("Successfully updated number of sessions."))
+            print(COLORS.pr_green("Successfully updated number of sessions."))
             input("Press Enter to continue...")
             break
         print(err)
@@ -532,7 +532,7 @@ def edit_guesses() -> None:
             settings["number of guesses"] = int(guesses)
             new = json.dumps(settings, indent=4)
             write_file(file = "../data/game_settings.txt", data = new)
-            print(s.pr_green("Successfully updated number of guesses."))
+            print(COLORS.pr_green("Successfully updated number of guesses."))
             input("Press Enter to continue...")
             break
         print(err)
@@ -555,7 +555,7 @@ def edit_top() -> None:
             settings["number of top players"] = int(top)
             new = json.dumps(settings, indent=4)
             write_file(file = "../data/game_settings.txt", data = new)
-            print(s.pr_green("Successfully updated number of top scores."))
+            print(COLORS.pr_green("Successfully updated number of top scores."))
             input("Press Enter to continue...")
             break
         print(err)
@@ -571,12 +571,16 @@ def print_top() -> None:
     """
     os.system("cls")
     logs = read_file(file = "../data/game_logs.txt")
+    if(len(logs) == 0):
+        print(f"\n{PADDING*3} No logs found. {PADDING*3}\n")
+        input("Press Enter to continue...")
+        return
     logs.sort(key=lambda x: x["points"], reverse=True)
     print(f"{PADDING*3}")
-    print(f"\t{s.pr_bold('Rank')}\t\t{s.pr_bold('Name')}\t\t{s.pr_bold('Points')}")
+    print(f"\t{COLORS.pr_bold('Rank')}\t\t{COLORS.pr_bold('Name')}\t\t{COLORS.pr_bold('Points')}")
     print(f"{PADDING*3}")
     for i, log in enumerate(logs, start=1):
-        print(f"\t{s.pr_bold(i)}\t\t{log['player']}\t\t{log['points']}")
+        print(f"\t{COLORS.pr_bold(i)}\t\t{log['player']}\t\t{log['points']}")
     print(f"\n{PADDING * 3}\n")
     input("Press Enter to continue...")
 
@@ -588,9 +592,9 @@ def search_logs() -> None:
     while 1:
         os.system("cls")
         print(f"{PADDING*2}\n")
-        print(f"\t{s.pr_bold('1')}: Search by name")
-        print(f"\t{s.pr_bold('2')}: Search by date")
-        print(f"\t{s.pr_bold('3')}: Back")
+        print(f"\t{COLORS.pr_bold('1')}: Search by name")
+        print(f"\t{COLORS.pr_bold('2')}: Search by date")
+        print(f"\t{COLORS.pr_bold('3')}: Back")
         print(f"\n{PADDING*2}\n")
         choice = input(">> ")
         if choice == "1":
@@ -600,7 +604,7 @@ def search_logs() -> None:
         elif choice == "3":
             break
         else:
-            print(s.pr_red("Invalid input. Please try again."))
+            print(COLORS.pr_red("Invalid input. Please try again."))
             input("Press Enter to continue...")
 
 
@@ -613,9 +617,9 @@ def search_name() -> None:
     for log in logs:
         if log["player"].lower() == name.lower():
             print(f"{PADDING*2}\n")
-            print(f"\t{s.pr_bold('Name')}: {log['player']}")
-            print(f"\t{s.pr_bold('Points')}: {log['points']}")
-            print(f"\t{s.pr_bold('Date')}: {log['date']}")
+            print(f"\t{COLORS.pr_bold('Name')}: {log['player']}")
+            print(f"\t{COLORS.pr_bold('Points')}: {log['points']}")
+            print(f"\t{COLORS.pr_bold('Date')}: {log['date']}")
             print(f"\n{PADDING*2}\n")
             input("Press Enter to continue...")
             return
@@ -657,7 +661,7 @@ def search_date() -> None:
             )
             print(f"{PADDING*3}")
             print(
-                f"\t{s.pr_bold('Name')}\t\t{s.pr_bold('Points')}\t\t{s.pr_bold('Date')}\n"
+                f"\t{COLORS.pr_bold('Name')}\t\t{COLORS.pr_bold('Points')}\t\t{COLORS.pr_bold('Date')}\n"
             )
             for player in list_of_players:
                 print(
@@ -680,7 +684,7 @@ def remove_log() -> None:
         print("List of players:")
         print(f"{PADDING*2}\n")
         for i, log in enumerate(logs, start=1):
-            print(f"\t{s.pr_bold(i)}: {log['player']}")
+            print(f"\t{COLORS.pr_bold(i)}: {log['player']}")
         print(f"\n{PADDING*2}\n")
         name = input("Enter player number to remove (0) to exit: ")
         if name == "0":
@@ -695,7 +699,7 @@ def remove_log() -> None:
                 del logs[name - 1]
                 new = json.dumps(logs, indent=4)
                 write_file(file = "../data/game_logs.txt", data = new)
-                print(s.pr_green("Successfully removed."))
+                print(COLORS.pr_green("Successfully removed."))
                 input("Press Enter to continue...")
                 break
         else:
@@ -718,11 +722,11 @@ def add_admin() -> None:
     sp_chars = "!@#$%"
     uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     lowercase = "abcdefghijklmnopqrstuvwxyz"
-    num_string = f"Contains at least one number {s.pr_red('✘')}"
-    sp_string = f"Contains at least one special character {s.pr_red('✘')}"
-    len_string = f"Contains between 4 and 20 characters {s.pr_red('✘')}"
-    upper_string = f"Contains at least one uppercase letter {s.pr_red('✘')}"
-    lower_string = f"Contains at least one lowercase letter {s.pr_red('✘')}"
+    num_string = f"Contains at least one number {COLORS.pr_red('✘')}"
+    sp_string = f"Contains at least one special character {COLORS.pr_red('✘')}"
+    len_string = f"Contains between 4 and 20 characters {COLORS.pr_red('✘')}"
+    upper_string = f"Contains at least one uppercase letter {COLORS.pr_red('✘')}"
+    lower_string = f"Contains at least one lowercase letter {COLORS.pr_red('✘')}"
     check_lowercase = False
     check_uppercase = False
     check_sp = False
@@ -731,20 +735,20 @@ def add_admin() -> None:
     ##
     if 4 < len(password) < 20:
         check_len = True
-        len_string = f"Contains between 4 and 20 characters {s.pr_green('✔')}"
+        len_string = f"Contains between 4 and 20 characters {COLORS.pr_green('✔')}"
     for i in password:
         if i in numbers:
             checknum = True
-            num_string = f"Contains at least one number {s.pr_green('✔')}"
+            num_string = f"Contains at least one number {COLORS.pr_green('✔')}"
         if i in sp_chars:
             check_sp = True
-            sp_string = f"Contains at least one special character {s.pr_green('✔')}"
+            sp_string = f"Contains at least one special character {COLORS.pr_green('✔')}"
         if i in uppercase:
             check_uppercase = True
-            upper_string = f"Contains at least one uppercase letter {s.pr_green('✔')}"
+            upper_string = f"Contains at least one uppercase letter {COLORS.pr_green('✔')}"
         if i in lowercase:
             check_lowercase = True
-            lower_string = f"Contains at least one lowercase letter {s.pr_green('✔')}"
+            lower_string = f"Contains at least one lowercase letter {COLORS.pr_green('✔')}"
     if not (
         checknum and check_sp and check_len and check_uppercase and check_lowercase
     ):
@@ -781,7 +785,7 @@ def add_admin() -> None:
     new = json.dumps(admins, indent=4)
     write_file(file = "../data/admin.txt", data = new)
     os.system("cls")
-    print(s.pr_green(f"Successfully added '{username}' as admin."))
+    print(COLORS.pr_green(f"Successfully added '{username}' as admin."))
     input("Press Enter to continue...")
 
 
@@ -797,7 +801,7 @@ def remove_admin() -> None:
             new = json.dumps(admins, indent=4)
             write_file(file = "../data/admin.txt", data = new)
             os.system("cls")
-            print(s.pr_green(f"Successfully removed '{username}' as admin."))
+            print(COLORS.pr_green(f"Successfully removed '{username}' as admin."))
             input("Press Enter to continue...")
             return
     print("Error. Username not found.")
@@ -816,7 +820,7 @@ def view_admins() -> None:
         os.system("cls")
         print(f"\nShowing {len(admins)} admins...")
         print(f"{PADDING*4}")
-        print(f"\t{s.pr_bold('Username')}\t\t{s.pr_bold('Password (hashed)')}\n")
+        print(f"\t{COLORS.pr_bold('Username')}\t\t{COLORS.pr_bold('Password (hashed)')}\n")
         for admin in admins:
             print(f"\t{admin['username']}\t\t{admin['password']}\n")
         print(f"{PADDING*4}")
@@ -837,17 +841,17 @@ def menu() -> int:
         os.system("cls")
         print("\n\n\n")
         banner(2)
-        print(s.pr_bold((f"{PADDING * 1} ~ MENU ~ {PADDING * 1}\n")))
+        print(COLORS.pr_bold((f"{PADDING * 1} ~ MENU ~ {PADDING * 1}\n")))
         t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('1')}: Word Settings")
+        print(f"\t\t{COLORS.pr_bold('1')}: Word Settings")
         t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('2')}: Game Settings")
+        print(f"\t\t{COLORS.pr_bold('2')}: Game Settings")
         t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('3')}: View Reports")
+        print(f"\t\t{COLORS.pr_bold('3')}: View Reports")
         t.sleep(0.05)
-        print(f"\t\t{s.pr_bold('4')}: Admin Settings")
+        print(f"\t\t{COLORS.pr_bold('4')}: Admin Settings")
         print(
-            f"\t\t{s.pr_bold('5')}: Exit\n\n{s.pr_bold(PADDING * 2 + '==========')}\n"
+            f"\t\t{COLORS.pr_bold('5')}: Exit\n\n{COLORS.pr_bold(PADDING * 2 + '==========')}\n"
         )
         t.sleep(0.05)
         user_input = input(">> ")
@@ -984,7 +988,7 @@ def main() -> None:
     # start the login, if attempts are exceeded, exit
     login_session = LoginManager(attempts = 3)
     if not login_session.login():
-        print(s.pr_red(("\nExiting...")))
+        print(COLORS.pr_red(("\nExiting...")))
         sys.exit()
     while 1:
         choice = menu()
@@ -1001,7 +1005,7 @@ def main() -> None:
                 print("Exiting...")
                 sys.exit()
             case _:
-                print(s.pr_red(("Invalid input. Please try again.")))
+                print(COLORS.pr_red(("Invalid input. Please try again.")))
                 input("Press Enter to continue...")
 
 
@@ -1011,5 +1015,5 @@ if __name__ == "__main__":
         PADDING = "=" * 25
         main()
     except KeyboardInterrupt:
-        print(s.pr_red(("\nExiting...")))
+        print(COLORS.pr_red(("\nExiting...")))
         sys.exit()

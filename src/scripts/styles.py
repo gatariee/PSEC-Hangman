@@ -1,10 +1,13 @@
 class Styles:
-    @staticmethod
-    def pr_red(s): 
-        return("\033[91m{}\033[00m" .format(s))
-    @staticmethod
-    def pr_green(s): 
-        return("\033[92m{}\033[00m" .format(s))
-    @staticmethod
-    def pr_bold(s):
-        return("\033[1m{}\033[00m" .format(s))
+    ANSI_COLORS = {
+        "red": "\033[91m",
+        "green": "\033[92m",
+        "bold": "\033[1m",
+        "reset": "\033[00m"
+    }
+    def pr_red(self, s):
+        return f"{self.ANSI_COLORS['red']}{s}{self.ANSI_COLORS['reset']}"
+    def pr_green(self, s):
+        return f"{self.ANSI_COLORS['green']}{s}{self.ANSI_COLORS['reset']}"
+    def pr_bold(self, s):
+        return f"{self.ANSI_COLORS['bold']}{s}{self.ANSI_COLORS['reset']}"
