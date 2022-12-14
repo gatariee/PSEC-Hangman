@@ -56,6 +56,7 @@ import os
 import time as t
 from datetime import date
 from styles import Styles as colours
+from banner import hm_banner
 #
 COLORS = colours()
 PADDING = "-" * 40
@@ -83,7 +84,22 @@ class Game:
 
         # Note that the attributes are quite extensive as they are used in multiple functions.
         # This is reset every time the player starts a new game.
-
+    def end_banner(self, format) -> None:
+        if(format == 1):
+            print(
+            f"After {len(self.incorrect_list)} incorrect guesses and "
+            f"{len(self.previous_guesses)-len(self.incorrect_list)} correct guesses. \n"
+            f"The word was \"{self.word}\".\n"
+            f"Its meaning is: '{self.meaning}'"
+            )
+        elif(format == 2):
+            formatted_word = (self.word).replace("_", " ")
+            print(
+            f"After {len(self.incorrect_list)} incorrect guesses and "
+            f"{len(self.previous_guesses)-len(self.incorrect_list)} correct guesses. \n"
+            f"The word was \"{formatted_word}\".\n"
+            f"Its meaning is: '{self.meaning}'"
+            )
     def calculate_points(self) -> int:
         """
         Calculates the points earned by the player based on their guess.
@@ -113,9 +129,9 @@ class Game:
             """
             # list of lowercase, uppercase, and punctuation characters allowed in the input
             LOWERCASE = "abcdefghijklmnopqrstuvwxyz"
-            UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            # UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             PUNCTUATION = "'!?,"
-            ALLOWED_CHARS = LOWERCASE + UPPERCASE + PUNCTUATION
+            ALLOWED_CHARS = LOWERCASE + PUNCTUATION
 
             # check if the input is a single character
             if len(letter) != 1:
@@ -141,6 +157,22 @@ class Game:
             # if the input is valid, return True
             return True
 
+        def update_guess_progress(count: int) -> int:
+            """
+            This function updates the guess_progress string.
+            """
+            # loop through each character in the word
+            for i, char in enumerate(self.word):
+                # if the character matches the guessed letter,
+                # increment the count and update the guess_progress string
+                if char == letter.lower():
+                    count+=1
+                    self.guess_progress = (
+                        self.guess_progress[: i * 2]
+                        + letter.lower()
+                        + self.guess_progress[i * 2 + 1 :]
+                    )
+            return count
         # Validation
         if not validate_guess():
             return
@@ -150,17 +182,7 @@ class Game:
 
         # check if the guessed letter is in the word
         if letter.lower() in self.word:
-            # loop through each character in the word
-            for i, char in enumerate(self.word):
-                # if the character matches the guessed letter,
-                # increment the count and update the guess_progress string
-                if char == letter.lower():
-                    count += 1
-                    self.guess_progress = (
-                        self.guess_progress[: i * 2]
-                        + letter.lower()
-                        + self.guess_progress[i * 2 + 1 :]
-                    )
+            count = update_guess_progress(count)
 
         # if the letter is not in the word,
         # increment the number of guesses and add the letter to the incorrect_list
@@ -176,6 +198,7 @@ class Game:
 
         # if there are more than one of the guessed letter in the word,
         # print a message indicating the number of occurrences of the letter
+        
         elif count > 1:
             os.system("cls")
             print(
@@ -194,7 +217,118 @@ class Game:
 
         # append the guessed letter to the previous_guesses list
         self.previous_guesses.append(letter)
+    
+    def banner(self, session: int, user_choice: int) -> None:
+        if user_choice == 1:
+            os.system("cls")
+            print("Your word is " + str(len(self.word)) + " letters long. ")
+        elif user_choice == 2:
+            def format_phrase(phrase: str) -> str:
+                for i in self.index_of_space:
+                    phrase = (
+                        phrase[: i * 2] + " " + phrase[i * 2 + 1 :]
+                    )
+                return phrase
+            print("Session: {} / {}".format(session, SETTINGS["sessions"]))
+            if len(self.index_of_space) > 0: 
+                # If the word contains a space(phrase)
+                formatted_phrase = format_phrase(self.guess_progress)
+                print("Phrase: {}".format(formatted_phrase))
+            else:
+                # normal game, word
+                print("Word: {}".format(self.guess_progress))
+            print(
+                "Incorrect Guesses ({}): {}".format(
+                    len(self.incorrect_list), ", ".join(self.incorrect_list)
+                )
+            )
+            print(
+                "Correct Guesses: {}".format(
+                    ", ".join(list(set(self.previous_guesses) - set(self.incorrect_list)))
+                )
+            )
+            print("Guesses remaining: {}".format(SETTINGS["guesses"] - self.guesses))
+            hm_banner(2, self.guesses)
 
+    def solve_vowels(self, vowels: list) -> None:
+        """
+        This function solves the vowels in the word.
+
+        Args:
+            game (object): This is the game object.
+            vowels (vowels): This is a list of vowels in the word.
+        """
+        vowels_unique = set(vowels)  # Convert vowels to a set to remove duplicates
+
+        for i, char in enumerate(self.word):
+            if char in vowels_unique:
+                self.guess_progress = self.guess_progress[:i*2] + char + self.guess_progress[i*2+1:]
+                self.previous_guesses.append(char)
+    def use_lifeline(self) -> None:
+        global lifeline_vowel, lifeline_meaning, meaning_usage
+        temp_vowels = COLORS.pr_green("Show Vowels")
+        temp_meaning = COLORS.pr_green("Show Meaning")
+        if lifeline_vowel:
+            temp_vowels = COLORS.pr_red(s = "Show Vowels")
+        if lifeline_meaning:
+            temp_meaning = COLORS.pr_red(s = "Show Meaning")
+
+        while 1:
+            os.system("cls")
+            print(
+            f"{PADDING}\n{COLORS.pr_bold('Lifelines')}\n\n"
+            f"1. {temp_vowels}\n"
+            f"2. {temp_meaning}\n"
+            f"3. Back\n"
+            )
+            if(lifeline_meaning and meaning_usage['word'] == self.word): 
+                # checks if the current word is the same as the word used in the meaning lifeline
+                # if it is, then it prints the meaning
+                # if it isn't, then it doesn't print the meaning
+                print(f"{COLORS.pr_green('Meaning: ')}{self.meaning}")
+            print(PADDING)
+            lifeline = input("Enter lifeline: ")
+            check, err = validate_input(user_input=lifeline, user_choice=3)
+            if check:
+                break
+            print(err)
+            input("Press enter to continue. ")
+
+        if int(lifeline) == 1:
+            if lifeline_vowel is True:
+
+                print(COLORS.pr_red(s = "You have already used this lifeline. "))
+                return
+            os.system("cls")
+            vowels = find_vowels(self.word)
+            if len(vowels) == 0:
+                print(COLORS.pr_red(s = "No vowels found. "))
+            else:
+                vowel_obj = {"a": 0, "e": 0, "i": 0, "o": 0, "u": 0}
+                for vowel in vowels:
+                    vowel_obj[vowel] += 1
+                print(PADDING)
+                print(COLORS.pr_green("\nVowels found! \n"))
+                for key, value in vowel_obj.items():
+                    if value > 0:
+                        print(f"{key} - {value}")
+                print(f"{PADDING}\n")
+                input("Press enter to continue. ")
+                self.solve_vowels(vowels)
+                lifeline_vowel = True
+                os.system("cls")
+        elif int(lifeline) == 2:
+            if lifeline_meaning is True:
+                os.system("cls")
+                print(COLORS.pr_red(s = "You have already used this lifeline. "))
+                return
+            lifeline_meaning = True
+            os.system("cls")
+            print(f"\n\n{PADDING}\n")
+            print(f'The meaning of the word is: \n"{self.meaning}"\n')
+            meaning_usage = {'word': self.word}
+        elif int(lifeline) == 3:
+            os.system("cls")
 
 def end_game(log_file: dict) -> None:
     """
@@ -222,15 +356,11 @@ def end_game(log_file: dict) -> None:
         f.write(log_string)
 
     # Print the game ending message
-    print(f"You have ended the game with {COLORS.pr_green(s = log['points'])} points.")
+    print(f"\n\tYou have ended the game with {COLORS.pr_green(s = log['points'])} points.".expandtabs(45))
     print(
-        f"Here is what we are logging: \n"
-        f"{PADDING2}\n"
-        f"\t  Name: {log['player']}\n"
-        f"\t  Points: {log['points']}\n"
-        f"\t  Date: {log['date']}\n"
-        f"{PADDING2}"
-    )
+        f"\n\tPlayer Log: \n\t{PADDING}\n\t    Name: {log['player']}\n\t    Points: {log['points']}\n\t    Date: {log['date']}\n\t{PADDING}\n\n".expandtabs(45)
+        + PADDING2*3
+        )
 
 
 def pick_word() -> tuple[str, str, str, bool, int]:
@@ -305,7 +435,7 @@ def menu() -> int:
         os.system("cls")
         print("\n\n")
         t.sleep(0.1)
-        hm_banner()  # ascii art
+        hm_banner(1)  # ascii art
         t.sleep(0.05)
         print(
             COLORS.pr_bold(
@@ -313,11 +443,11 @@ def menu() -> int:
             )
         )
         t.sleep(0.05)
-        print(COLORS.pr_bold("                        1. Start new game\n"))
+        print(COLORS.pr_bold("                        1. Start New Game\n"))
         t.sleep(0.05)
-        print(COLORS.pr_bold("                        2. Print leaderboard\n"))
+        print(COLORS.pr_bold("                        2. Print Leaderboard\n"))
         t.sleep(0.05)
-        print(COLORS.pr_bold("                        3. Search player\n"))
+        print(COLORS.pr_bold("                        3. Search Player\n"))
         t.sleep(0.05)
         print(COLORS.pr_bold("                        4. Exit\n"))
         user_input = input(">> ")
@@ -326,134 +456,6 @@ def menu() -> int:
             return int(user_input)
         input(f"{err}\nPress Enter to continue...")
 
-
-def banner(game: Game, session: int, user_choice: int) -> None:
-    """
-    This function prints the banner of the game.
-
-    Args:
-        game (object): This is the game object
-        session (int): This is the session number
-        choice (int): This is the choice of the player
-    """
-    if user_choice == 1:
-        os.system("cls")
-        print("Your word is " + str(len(game.word)) + " letters long. ")
-    elif user_choice == 2:
-        def format_phrase(phrase: str) -> str:
-            for i in game.index_of_space:
-                phrase = (
-                    phrase[: i * 2] + " " + phrase[i * 2 + 1 :]
-                )
-            return phrase
-        print("Session: {} / {}".format(session, SETTINGS["sessions"]))
-        if len(game.index_of_space) > 0: 
-            # If the word contains a space(phrase)
-            formatted_phrase = format_phrase(game.guess_progress)
-            print("Phrase: {}".format(formatted_phrase))
-        else:
-            # normal game, word
-            print("Word: {}".format(game.guess_progress))
-        print(
-            "Incorrect Guesses ({}): {}".format(
-                len(game.incorrect_list), ", ".join(game.incorrect_list)
-            )
-        )
-        print(
-            "Correct Guesses: {}".format(
-                ", ".join(list(set(game.previous_guesses) - set(game.incorrect_list)))
-            )
-        )
-        print("Guesses remaining: {}".format(SETTINGS["guesses"] - game.guesses))
-        print_hangman(guess_num=game.guesses)
-
-
-def hm_banner() -> None:
-    """
-    This function prints the banner of the game.
-    """
-    print(
-        COLORS.pr_red(s = 
-            r"""
-    ██╗  ██╗ █████╗ ███╗   ██╗ ██████╗ ███╗   ███╗ █████╗ ███╗   ██╗
-    ██║  ██║██╔══██╗████╗  ██║██╔════╝ ████╗ ████║██╔══██╗████╗  ██║
-    ███████║███████║██╔██╗ ██║██║  ███╗██╔████╔██║███████║██╔██╗ ██║
-    ██╔══██║██╔══██║██║╚██╗██║██║   ██║██║╚██╔╝██║██╔══██║██║╚██╗██║
-    ██║  ██║██║  ██║██║ ╚████║╚██████╔╝██║ ╚═╝ ██║██║  ██║██║ ╚████║
-    ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝"""
-        )
-    )
-
-
-def print_hangman(guess_num: int) -> None:
-    """
-    This function prints the hangman ascii art.
-
-    Arguments:
-        guess_num {int}: This is the number of guesses the player has made
-
-    """
-    match guess_num:
-        case 0:
-            print(
-                r"""                +---+
-                |   |
-                    |
-                    |
-                    |
-                    |
-                ========="""
-            )
-        case 1:
-            print(
-                r"""                +---+
-                |   |
-                O   |
-                |   |
-                    |
-                    |
-                ========="""
-            )
-        case 2:
-            print(
-                r"""                +---+
-                |   |
-                O   |
-               /|   |
-                    |
-                    |
-                ========="""
-            )
-        case 3:
-            print(
-                r"""                +---+
-                |   |
-                O   |
-               /|\  |
-                    |
-                    |
-                ========="""
-            )
-        case 4:
-            print(
-                r"""                +---+
-                |   |
-                O   |
-               /|\  |
-               /    |
-                    |
-                ========="""
-            )
-        case 5:
-            print(
-                r"""                +---+
-                |   |
-                O   |
-               /|\  |
-               / \  |
-                    |
-                ========="""
-            )
 
 
 def validate_input(user_input: str | int, user_choice: int) -> tuple[bool, str]:
@@ -519,21 +521,6 @@ def find_vowels(word: str) -> list[str]:
     return [char for char in word if char in vowels]
 
 
-def solve_vowels(game: Game, vowels: list) -> None:
-    """
-    This function solves the vowels in the word.
-
-    Args:
-        game (object): This is the game object.
-        vowels (vowels): This is a list of vowels in the word.
-    """
-    vowels_unique = set(vowels)  # Convert vowels to a set to remove duplicates
-
-    for i, char in enumerate(game.word):
-        if char in vowels_unique:
-            game.guess_progress = game.guess_progress[:i*2] + char + game.guess_progress[i*2+1:]
-            game.previous_guesses.append(char)
-
 
 def print_leaderboard(num: int) -> None:
     """
@@ -585,8 +572,7 @@ def search_player() -> None:
             print("Error. Game logs not found. ")
 
     logs = read_logs()
-    name = input("Enter player name: ")
-    # checklist: 1. prompt for player name
+    name = input("Enter Player Name: ")
     for item in logs:
         if item["player"].lower() == name.lower():
             print(f"{PADDING}\n{item['player']} - {item['points']} points\n{PADDING}")
@@ -625,64 +611,7 @@ def main() -> None:
             break
         print(err)
 
-def use_lifeline(hang_man: Game) -> None:
-        global lifeline_vowel, lifeline_meaning
-        temp_vowels = COLORS.pr_green("Show Vowels")
-        temp_meaning = COLORS.pr_green("Show Meaning")
-        if lifeline_vowel:
-            temp_vowels = COLORS.pr_red(s = "Show Vowels")
-        if lifeline_meaning:
-            temp_meaning = COLORS.pr_red(s = "Show Meaning")
 
-        while 1:
-            os.system("cls")
-            print(
-            f"{PADDING}\nLifelines: \n"
-            f"1. {temp_vowels}\n"
-            f"2. {temp_meaning}\n"
-            f"3. Back\n"
-            f"{PADDING}"
-            )
-            lifeline = input("Enter lifeline: ")
-            check, err = validate_input(user_input=lifeline, user_choice=3)
-            if check:
-                break
-            print(err)
-            input("Press enter to continue. ")
-
-        if int(lifeline) == 1:
-            if lifeline_vowel is True:
-
-                print(COLORS.pr_red(s = "You have already used this lifeline. "))
-                return
-            os.system("cls")
-            vowels = find_vowels(hang_man.word)
-            if len(vowels) == 0:
-                print(COLORS.pr_red(s = "No vowels found. "))
-            else:
-                vowel_obj = {"a": 0, "e": 0, "i": 0, "o": 0, "u": 0}
-                for vowel in vowels:
-                    vowel_obj[vowel] += 1
-                print(PADDING)
-                print(COLORS.pr_green("\nVowels found! \n"))
-                for key, value in vowel_obj.items():
-                    if value > 0:
-                        print(f"{key} - {value}")
-                print(f"{PADDING}\n")
-                input("Press enter to continue. ")
-                solve_vowels(hang_man, vowels)
-                lifeline_vowel = True
-                os.system("cls")
-        elif int(lifeline) == 2:
-            if lifeline_meaning is True:
-                os.system("cls")
-                print(COLORS.pr_red(s = "You have already used this lifeline. "))
-            lifeline_meaning = True
-            os.system("cls")
-            print(f"\n\n{PADDING}\n")
-            print(f'The meaning of the word is: \n"{hang_man.meaning}"\n')
-        elif int(lifeline) == 3:
-            os.system("cls")
 def begin(player_name: str) -> None:
     """
     this function begins the game
@@ -695,7 +624,7 @@ def begin(player_name: str) -> None:
 
     # Display banner on the first session (important)
     if SESSION == 1:
-        banner(game=hang_man, session=SESSION, user_choice=1)
+        hang_man.banner(session=SESSION, user_choice=1)
 
     # Keep playing until player runs out of guesses or guesses the word
     while (hang_man.guesses < SETTINGS["guesses"]) and (
@@ -704,46 +633,34 @@ def begin(player_name: str) -> None:
         # Calculate the player's points at the start of every guess
         hang_man.calculate_points()
         # Display the game banner
-        banner(game=hang_man, session=SESSION, user_choice=2)
+        hang_man.banner(session=SESSION, user_choice=2)
         # Ask player to guess a letter or activate a lifeline
         guess = input("Guess ('0' to activate lifeline): ")
 
     # If player chooses to activate a lifeline
         if guess == "0":
             os.system('cls')
-
-            # Use the lifeline
-            use_lifeline(hang_man=hang_man)
+            hang_man.use_lifeline()
 
         # If player chooses to guess a letter
         else:
-            # Make the guess
+            guess = guess.lower()
             hang_man.guess_letter(letter=guess)
         print(PADDING)
 
     # The while loop has been exited, so the player has either guessed the word or run out of guesses
     if hang_man.guesses == SETTINGS["guesses"]:
+        hm_banner(2, 5)
         print(COLORS.pr_red(s = "\nYou have reached the maximum number of guesses. "))
 
     else:
         print(COLORS.pr_green("\nWell Done! You have guessed the word. "))
     if hang_man.space is False: 
-        # formatting for non-spaces(type = Word)
-        print(
-        f"After {len(hang_man.incorrect_list)} incorrect guesses and "
-        f"{len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. \n"
-        f"The word was \"{hang_man.word}\".\n"
-        f"Its meaning is: '{hang_man.meaning}'"
-        )
+        # formatting without spaces(type = Idiom-Proverbs)
+        hang_man.end_banner(format = 1)
     else: 
-        # formatting with spaces(type = Idiom-Proverbs)
-        formatted_word = (hang_man.word).replace("_", " ")
-        print(
-        f"After {len(hang_man.incorrect_list)} incorrect guesses and "
-        f"{len(hang_man.previous_guesses)-len(hang_man.incorrect_list)} correct guesses. \n"
-        f"The word was \"{formatted_word}\".\n"
-        f"Its meaning is: '{hang_man.meaning}'"
-        )
+        # formatting with spaces(type = Word)
+        hang_man.end_banner(format = 2)
     if SESSION < SETTINGS["sessions"]:
         # The game is over BUT there are still more sessions to be played.
         SESSION += 1
@@ -757,14 +674,20 @@ def begin(player_name: str) -> None:
         if log["points"] > 15:
             # I'm going to be honest, I don't know what this does
             # But this was in the requirements, so I will fulfill it dilligently
-            print(PADDING2)
-            print(f"Congratulations! You have {COLORS.pr_green(s = 'won')} the game! ")
+            input("Press enter to continue... ")
+            os.system('cls')
+            hm_banner(3)
+            print(PADDING2*3)
+            print(
+                f"\n\tCongratulations! You have {COLORS.pr_green(s = 'won')} the game! "
+                .expandtabs(45))
         else:
-            print(PADDING2)
-            print(f"You have {COLORS.pr_red(s = 'lost')} the game. ")
+            print(PADDING2*3)
+            print(f"\n\tYou have {COLORS.pr_red(s = 'lost')} the game. ".expandtabs(45))
         log["points"] += hang_man.calculate_points()
         log["player"] = (hang_man.player).capitalize()
         end_game(log_file=log)
+
 
 
 if __name__ == "__main__":

@@ -680,8 +680,9 @@ def remove_log() -> None:
     """
     logs = read_file(file = "../data/game_logs.txt")
     while 1:
-        print(f"{PADDING*2}\n")
-        print("List of players:")
+        os.system('cls')
+        print(f"\n{PADDING*2}")
+        print("List of Players:")
         print(f"{PADDING*2}\n")
         for i, log in enumerate(logs, start=1):
             print(f"\t{COLORS.pr_bold(i)}: {log['player']}")
@@ -693,13 +694,13 @@ def remove_log() -> None:
         if check:
             name = int(name)
             if name > len(logs):
-                print("Invalid input.")
+                print(COLORS.pr_red("Please enter a number within range. "))
                 input("Press Enter to continue...")
             else:
+                print(COLORS.pr_green(f"Successfully removed {logs[name-1]['player']}"))
                 del logs[name - 1]
                 new = json.dumps(logs, indent=4)
                 write_file(file = "../data/game_logs.txt", data = new)
-                print(COLORS.pr_green("Successfully removed."))
                 input("Press Enter to continue...")
                 break
         else:
@@ -1017,3 +1018,104 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print(COLORS.pr_red(("\nExiting...")))
         sys.exit()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
