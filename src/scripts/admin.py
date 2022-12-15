@@ -6,7 +6,6 @@ import datetime
 import sys
 from getpass import getpass
 from styles import Styles as colours
-COLORS = colours()
 from banner import admin_banner as banner
 class LoginManager:
     """
@@ -1013,6 +1012,7 @@ def main() -> None:
 if __name__ == "__main__":
     os.system("cls")
     try:
+        COLORS = colours()
         PADDING = "=" * 25
         main()
     except KeyboardInterrupt:
