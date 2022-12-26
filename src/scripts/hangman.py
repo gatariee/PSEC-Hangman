@@ -37,11 +37,14 @@ https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-te
 
 Library/Module:
 - these modules are installed by default in Python 3.11
+    - hashlib
     - random
     - json
     - os
     - time
     - datetime
+    - getpass
+    - sys
 
 Known Issues:
     - The global variable is referenced a lot in the code.
@@ -67,20 +70,19 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Game:
-    def __init__(self, player: str) -> None:
+    def __init__(self, player_name) -> None:
         """
         Initializes the attributes of the Game class.
 
         Args:
             player (str): Input name of player
         """
-        self.player = player
+        self.name = player_name
         self.word, self.meaning, self.difficulty, self.space, self.index_of_space = pick_word()
         self.guesses = 0
         self.previous_guesses = []
         self.incorrect_list = []
         self.guess_progress = "_ " * len(self.word)
-        self.total_points = 0
 
         # Note that the attributes are quite extensive as they are used in multiple functions.
         # This is reset every time the player starts a new game.
@@ -221,7 +223,7 @@ class Game:
     def banner(self, session: int, user_choice: int) -> None:
         if user_choice == 1:
             os.system("cls")
-            print("Your word is " + str(len(self.word)) + " letters long. ")
+            print(f"Welcome to Hangman, {self.name}!")
         elif user_choice == 2:
             def format_phrase(phrase: str) -> str:
                 for i in self.index_of_space:
@@ -264,7 +266,14 @@ class Game:
             if char in vowels_unique:
                 self.guess_progress = self.guess_progress[:i*2] + char + self.guess_progress[i*2+1:]
                 self.previous_guesses.append(char)
+        # this is essentially the same as the update_guess_progress function
+        # but it is used for vowels
+        # a better way to do this would be to use a for loop and pipe all the vowels into update_guess_progress
+        # but I'm too lazy to do that
     def use_lifeline(self) -> None:
+        """
+        Prints the lifelines menu and allows the user to use a lifeline.
+        """
         global lifeline_vowel, lifeline_meaning, meaning_usage
         temp_vowels = COLORS.pr_green("Show Vowels")
         temp_meaning = COLORS.pr_green("Show Meaning")
@@ -296,7 +305,6 @@ class Game:
 
         if int(lifeline) == 1:
             if lifeline_vowel is True:
-
                 print(COLORS.pr_red(s = "You have already used this lifeline. "))
                 return
             os.system("cls")
@@ -304,18 +312,24 @@ class Game:
             if len(vowels) == 0:
                 print(COLORS.pr_red(s = "No vowels found. "))
             else:
+                # Create a dictionary of vowels and their count
                 vowel_obj = {"a": 0, "e": 0, "i": 0, "o": 0, "u": 0}
                 for vowel in vowels:
                     vowel_obj[vowel] += 1
+                # there's probably a better way to do this
+                # but I'm too lazy to figure it out
                 print(PADDING)
                 print(COLORS.pr_green("\nVowels found! \n"))
                 for key, value in vowel_obj.items():
                     if value > 0:
                         print(f"{key} - {value}")
+                # print the vowels found
                 print(f"{PADDING}\n")
                 input("Press enter to continue. ")
                 self.solve_vowels(vowels)
+                # solve the vowels in self.guess_progress
                 lifeline_vowel = True
+                # set lifeline_vowel to True so that the user can't use it again
                 os.system("cls")
         elif int(lifeline) == 2:
             if lifeline_meaning is True:
@@ -326,7 +340,10 @@ class Game:
             os.system("cls")
             print(f"\n\n{PADDING}\n")
             print(f'The meaning of the word is: \n"{self.meaning}"\n')
+            # print the meaning of the word
             meaning_usage = {'word': self.word}
+            # set the meaning_usage dictionary to the current word
+            # so that the meaning can be accessed in the lifeline menu again
         elif int(lifeline) == 3:
             os.system("cls")
 
@@ -356,10 +373,10 @@ def end_game(log_file: dict) -> None:
         f.write(log_string)
 
     # Print the game ending message
-    print(f"\n\tYou have ended the game with {COLORS.pr_green(s = log['points'])} points.".expandtabs(45))
+    print(f"\n\tYou have ended the game with {COLORS.pr_green(s = log['points'])} points.".expandtabs(30))
     print(
-        f"\n\tPlayer Log: \n\t{PADDING}\n\t    Name: {log['player']}\n\t    Points: {log['points']}\n\t    Date: {log['date']}\n\t{PADDING}\n\n".expandtabs(45)
-        + PADDING2*3
+        f"\n\tPlayer Log: \n\t{PADDING}\n\t    Name: {log['player']}\n\t    Points: {log['points']}\n\t    Date: {log['date']}\n\t{PADDING}\n\n".expandtabs(30)
+        + PADDING2*2 + '\n\n'
         )
 
 
@@ -459,9 +476,8 @@ def menu() -> int:
 
 
 def validate_input(user_input: str | int, user_choice: int) -> tuple[bool, str]:
-    # checklist: 1.2 (validate all inputs)
     """
-    _summary_
+    All inputs are validated here
 
     Args:
         user_input (str/int): this is the user input, could be a string or an integer. name or option
@@ -477,6 +493,7 @@ def validate_input(user_input: str | int, user_choice: int) -> tuple[bool, str]:
         UPPERCASE = [chr(i) for i in range(65, 91)]
         SP_CHARS = ["-", "/"]
         ALLOWED_CHARS = UPPERCASE + LOWERCASE + SP_CHARS
+        # if you want to add more characters, add them to the ALLOWED_CHARS list
         if not all(char in ALLOWED_CHARS for char in user_input) or len(user_input) == 0:
             return False, "Please enter a valid name. "
 
@@ -545,11 +562,14 @@ def print_leaderboard(num: int) -> None:
 
     logs = read_logs()
     logs.sort(key=lambda x: x["points"], reverse=True)
+    # sort the logs in descending order of points
+    # the top player will be at the top of the list
     print(f"{PADDING}\n LEADERBOARD (Top {num})\n{PADDING}")
     for i, value in enumerate(logs):
         if i == num:
             break
         print(f"{i+1}. {value['player']} - {value['points']}")
+        # this i+1 thing is just to make the leaderboard look better
     print(f"{PADDING}\n")
 
 
@@ -594,6 +614,7 @@ def init_game_settings() -> dict | None:
             game_settings["guesses"] = game_settings.pop("number of guesses", None)
             game_settings["top"] = game_settings.pop("number of top players", None)
             return game_settings
+            # completely unnecessary but it looks nicer
     except FileNotFoundError:
         print("Error. game_settings.txt not found. ")
         return None
@@ -606,7 +627,9 @@ def main() -> None:
     while 1:  # loops until check is true
         player_name = input("Enter your name: ")
         check, err = validate_input(user_input=player_name, user_choice=1)
+        # check if the input is valid
         if check:
+            # if the input is valid,
             begin(player_name=player_name)
             break
         print(err)
@@ -620,7 +643,7 @@ def begin(player_name: str) -> None:
         player_name (str): this is the player's name
     """
     global SESSION, lifeline_vowel, lifeline_meaning
-    hang_man = Game(player_name)
+    hang_man = Game(player_name=player_name)
 
     # Display banner on the first session (important)
     if SESSION == 1:
@@ -673,31 +696,32 @@ def begin(player_name: str) -> None:
     else:
         if log["points"] > 15:
             # I'm going to be honest, I don't know what this does
-            # But this was in the requirements, so I will fulfill it dilligently
+            # But this was in the requirements
             input("Press enter to continue... ")
             os.system('cls')
             hm_banner(3)
-            print(PADDING2*3)
+            print(PADDING2*2)
             print(
                 f"\n\tCongratulations! You have {COLORS.pr_green(s = 'won')} the game! "
-                .expandtabs(45))
+                .expandtabs(30))
         else:
-            print(PADDING2*3)
-            print(f"\n\tYou have {COLORS.pr_red(s = 'lost')} the game. ".expandtabs(45))
+            print(PADDING2*2)
+            print(f"\n\tYou have {COLORS.pr_red(s = 'lost')} the game. ".expandtabs(30))
         log["points"] += hang_man.calculate_points()
-        log["player"] = (hang_man.player).capitalize()
+        log["player"] = (hang_man.name).capitalize()
         end_game(log_file=log)
 
 
 
 if __name__ == "__main__":
     # initialize game settings, please don't change this midgame
-    SETTINGS = init_game_settings()
     try:
+        SETTINGS = init_game_settings()
         while 1:
             choice = menu()
             match choice:
                 case 1:
+                    # reset game settings
                     lifeline_vowel = False
                     lifeline_meaning = False
                     SESSION = 1

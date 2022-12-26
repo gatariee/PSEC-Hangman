@@ -1,3 +1,59 @@
+"""
+Main Program
+
+StudentID:      p2205513
+Name:           Zavier Lee Wey
+Class:          DISM/FT/1B/05
+Assessment:     CA1-1
+
+Script name:
+    admin.py
+
+Purpose:
+    This script is the admin panel for the hangman game.
+
+Usage syntax:
+    python admin.py
+
+Input file:
+    ./scripts/admin.py
+    ./scripts/hangman.py
+    ./scripts/banner.py
+    ./scripts/style.py
+
+
+Output file:
+    ./data/game_logs.txt
+    ./data/game_settings.txt
+    ./data/word_list.txt
+
+Python Version:
+    Python 3.11
+
+Reference:
+https://stackoverflow.com/questions/2769061/how-to-erase-the-file-contents-of-text-file-in-python
+https://stackoverflow.com/questions/17140886/how-to-search-and-replace-text-in-a-file-using-python
+https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
+
+Library/Module:
+- these modules are installed by default in Python 3.11
+    - hashlib
+    - random
+    - json
+    - os
+    - time
+    - datetime
+    - getpass
+    - sys
+
+Known Issues:
+    - The global variable is referenced a lot in the code.
+        - This means that the code may not be safe to be used in a multi-threaded environment.
+        - You may want to consider using a class to store the global variables, if you choose to use this code in a multi-threaded environment.
+        - I am aware this is not the best practice, but I am not sure how to implement it in this case.
+"""
+
+
 import json
 import os
 import hashlib
@@ -97,9 +153,9 @@ def read_file(file: str) -> list | None:
         # Read the file and return the contents as a list
         with open(file, "r") as f:
             return json.loads((f.read()))
-
     except FileNotFoundError:
-        # If the file is not found, print an error message and return None
+        print(f"Error. {file} is either empty or missing. The program may not work properly. ")
+        input("Press enter to continue... ")
         return ""
 
 def write_file(file: str, data: str) -> None:
@@ -496,6 +552,7 @@ def edit_session() -> None:
     """
     Edit the number of sessions
     """
+    
     settings = read_file(file="../data/game_settings.txt")
     while 1:
         os.system("cls")
@@ -571,7 +628,7 @@ def print_top() -> None:
     os.system("cls")
     logs = read_file(file = "../data/game_logs.txt")
     if(len(logs) == 0):
-        print(f"\n{PADDING*3} No logs found. {PADDING*3}\n")
+        print(f"\n{PADDING*1} No logs found. {PADDING*1}\n")
         input("Press Enter to continue...")
         return
     logs.sort(key=lambda x: x["points"], reverse=True)
@@ -641,36 +698,37 @@ def search_date() -> None:
         input("Press Enter to continue...")
         return
     try:
-        list_of_players = []
-        os.system("cls")
         start_date_ugly = datetime.datetime.strptime(start_date, "%d/%m/%y")
         end_date_ugly = datetime.datetime.strptime(end_date, "%d/%m/%y")
-        logs = read_file(file = "../data/game_logs.txt")
-        if logs is None:
-            return
-        for player in logs:
-            date = datetime.datetime.strptime(player["date"], "%d/%m/%y")
-            if start_date_ugly <= date <= end_date_ugly:
-                list_of_players.append(player)
-        if len(list_of_players) == 0:
-            print("No results found.")
-        else:
-            print(
-                f"\nShowing {len(list_of_players)} results between {start_date} and {end_date}..."
-            )
-            print(f"{PADDING*3}")
-            print(
-                f"\t{COLORS.pr_bold('Name')}\t\t{COLORS.pr_bold('Points')}\t\t{COLORS.pr_bold('Date')}\n"
-            )
-            for player in list_of_players:
-                print(
-                    f"\t{player['player']}\t\t{player['points']}\t\t{player['date']}\n"
-                )
-            print(f"{PADDING*3}")
-        input("Press Enter to continue...")
     except ValueError:
-        print("Error. Invalid date format. ")
+        print("Invalid date format.")
         input("Press Enter to continue...")
+        return
+    list_of_players = []
+    os.system("cls")
+    logs = read_file(file = "../data/game_logs.txt")
+    if logs is None:
+        return
+    for player in logs:
+        date = datetime.datetime.strptime(player["date"], "%d/%m/%y")
+        if start_date_ugly <= date <= end_date_ugly:
+            list_of_players.append(player)
+    if len(list_of_players) == 0:
+        print("No results found.")
+    else:
+        print(
+            f"\nShowing {len(list_of_players)} results between {start_date} and {end_date}..."
+        )
+        print(f"{PADDING*3}")
+        print(
+            f"\t{COLORS.pr_bold('Name')}\t\t{COLORS.pr_bold('Points')}\t\t{COLORS.pr_bold('Date')}\n"
+        )
+        for player in list_of_players:
+            print(
+                f"\t{player['player']}\t\t{player['points']}\t\t{player['date']}\n"
+            )
+        print(f"{PADDING*3}")
+    input("Press Enter to continue...")
 
 
 def remove_log() -> None:
@@ -1014,108 +1072,8 @@ if __name__ == "__main__":
     try:
         COLORS = colours()
         PADDING = "=" * 25
+        # 
         main()
     except KeyboardInterrupt:
         print(COLORS.pr_red(("\nExiting...")))
         sys.exit()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 import os
 import time as t
 from styles import Styles as colours
-import ast
+import json
 COLORS = colours()
 PADDING = "=" * 25
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -11,7 +11,6 @@ def admin_banner(num: int) -> None:
     Prints the admin banner
     Args:
         num (int): The index of the banner to print
-
     """
     if num == 1:
         os.system("cls")
@@ -53,10 +52,12 @@ def admin_banner(num: int) -> None:
             with open("../data/game_settings.txt", "r") as f:
                 if(os.stat("../data/game_settings.txt").st_size == 0):
                     raise FileNotFoundError
-                obj = ast.literal_eval(f.read())
+                obj = json.loads(f.read())
         except FileNotFoundError:
-            print("Fatal Error. Settings not found. Please ensure that the file exists and is not empty.")
-            exit()
+            with open("../data/game_settings.txt", "w") as f:
+                settings_content = {'number of sessions': 5, 'number of guesses': 5, 'number of top players': 5}
+                f.write(json.dumps(settings_content, indent = 4))
+                obj = settings_content
         os.system("cls")
         print(COLORS.pr_bold((f"\n\n\n{PADDING} ~ MENU ~ {PADDING}\n")))
         print(f"\tYou have selected: {COLORS.pr_bold('Game Settings')}\n")
@@ -118,7 +119,14 @@ def admin_banner(num: int) -> None:
         )
 
 
-def hm_banner(*args):
+def hm_banner(*args: int) -> None:
+    """
+    hm_banner prints a banner to the console.
+
+    Args:
+    *args (int): A list of integers used to determine which banner to print.
+
+    """
     if(args[0] == 1):
         print(
             COLORS.pr_red(s = 

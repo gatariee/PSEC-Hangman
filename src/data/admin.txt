@@ -6,9 +6,5 @@
     {
         "username": "1",
         "password": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
-    },
-    {
-        "username": "test",
-        "password": "e580e74de63d81fa8a15c19ed928d39e1d1a9a8e5367944227048ad03fa00473"
     }
 ]

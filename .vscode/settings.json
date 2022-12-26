@@ -1,8 +1,14 @@
 {
     "python.formatting.provider": "black",
     "vscord.app.name": "Visual Studio Code",
-    "vscord.status.idle.enabled": false,
+    "vscord.status.idle.enabled": true,
     "vscord.status.details.text.editing": "{workspace} {problems}",
     "vscord.status.state.text.editing": "{file_name}{file_extension} on line {current_line} of {line_count}",
-    "vscord.status.details.text.viewing": "{workspace} {problems}"
+    "vscord.status.details.text.viewing": "{workspace} {problems}",
+    "github.copilot.enable": {
+        "*": true,
+        "yaml": true,
+        "plaintext": true,
+        "markdown": true
+    }
 }
