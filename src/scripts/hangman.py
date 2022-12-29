@@ -409,17 +409,9 @@ def pick_word() -> tuple[str, str, str, bool, int]:
             exit()
 
     wordlist = read_words()
-
-    # create a list of words that are enabled
     enabled_words = [word for word in wordlist if word["enabled"] == "on"]
-
-    # create a list of words that are not in the previous words list
     usable_words = [word for word in enabled_words if word["word"] not in previous_words]
-
-    # select a random word from the usable words
     selected_word = random.choice(usable_words)
-
-    # add the selected word to the previous words list
     previous_words.append(selected_word["word"])
 
     # unpack the selected word into separate variables
